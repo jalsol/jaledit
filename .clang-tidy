@@ -1,0 +1,16 @@
+Checks: "
+    cppcoreguidelines-*,
+    bugprone-*,
+    modernize-*,
+    performance-*,
+    readability-*,
+    -bugprone-easily-swappable-parameters,
+    -readability-else-after-return,
+    -readability-static-accessed-through-instance,
+    -readability-avoid-const-params-in-decls,
+    -readability-function-cognitive-complexity,
+    -cppcoreguidelines-non-private-member-variables-in-classes,
+    -cppcoreguidelines-owning-memory,
+    -modernize-use-trailing-return-type,
+    -modernize-use-nodiscard,
+"
