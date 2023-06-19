@@ -34,6 +34,9 @@ include_directories(src)
 
 add_executable(${PROJECT_NAME}
     src/main.c
+    src/app.c
+    src/buffer.c
+    src/editor.c
 )
 
 target_link_libraries(${PROJECT_NAME} raylib)
