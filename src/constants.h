@@ -13,4 +13,6 @@ enum Limit {
 enum {
     FONT_SIZE = 20,
     MARGIN = 20,
+    BUFFER_LIMIT = 1 << 10,
+    CHAR_LIMIT = 1 << 8,
 };

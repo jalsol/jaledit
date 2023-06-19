@@ -5,6 +5,7 @@
 #include <stddef.h>
 
 #include "buffer.h"
+#include "constants.h"
 
 typedef enum {
     KEYBIND_NONE,
@@ -19,7 +20,7 @@ typedef union {
 } KeybindHandlerArgs;
 
 typedef struct KeybindTrieNode {
-    struct KeybindTrieNode *children[1 << 8];
+    struct KeybindTrieNode *children[CHAR_LIMIT];
     KeybindHandlerType handler_type;
     KeybindHandlerArgs handler_args;
 } KeybindTrieNode;

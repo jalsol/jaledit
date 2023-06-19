@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "buffer.h"
+#include "constants.h"
 
 KeybindTrie keybind_trie_construct() {
     KeybindTrie trie;
@@ -22,7 +23,7 @@ void keybind_trie_destruct(KeybindTrie *trie) {
 }
 
 void keybind_trie_node_destruct(KeybindTrieNode *node) {
-    for (int i = 0; i < (1 << 8); i++) {
+    for (int i = 0; i < CHAR_LIMIT; i++) {
         if (node->children[i] != NULL) {
             keybind_trie_node_destruct(node->children[i]);
             free(node->children[i]);
@@ -70,10 +71,10 @@ void keybind_trie_insert(KeybindTrie *trie, const char *sequence,
                          KeybindHandlerType handler_type,
                          KeybindHandlerArgs handler_args) {
     KeybindTrieNode *node = trie->root;
-    int seq_len = strlen(sequence);
+    size_t seq_len = strlen(sequence);
 
-    for (int i = 0; i < seq_len; i++) {
-        int c = sequence[i];
+    for (size_t i = 0; i < seq_len; i++) {
+        char c = sequence[i];
         if (node->children[c] == NULL) {
             node->children[c] = malloc(sizeof(KeybindTrieNode));
             memset(node->children[c], 0, sizeof(KeybindTrieNode));
