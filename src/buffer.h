@@ -17,6 +17,8 @@ typedef struct RowNode {
 typedef struct {
     int x;
     int y;
+    char c;
+    RowNode *row;
 } Cursor;
 
 typedef struct {
@@ -39,3 +41,5 @@ RowNode *buffer_insert_row(Buffer *buffer, int index, const char *line,
                            int line_len);
 // RowNode *buffer_delete_row(Buffer *buffer, int index);
 void buffer_relabel_rows(Buffer *buffer);
+
+void buffer_move_cursor(Buffer *buffer, int dx, int dy);

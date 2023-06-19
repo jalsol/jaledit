@@ -15,6 +15,18 @@ Buffer buffer_construct(const char *file_path) {
         exit(1);
     }
 
+    if (buffer.rows_len == 0) {
+        buffer_insert_row(&buffer, 0, "", 0);
+    }
+
+    buffer.cursor.row = buffer.rows_head;
+
+    if (buffer.rows_head->row.content_len > 0) {
+        buffer.cursor.c = buffer.rows_head->row.content[0];
+    } else {
+        buffer.cursor.c = ' ';
+    }
+
     return buffer;
 }
 
@@ -117,4 +129,39 @@ void buffer_relabel_rows(Buffer *buffer) {
     for (RowNode *row = buffer->rows_head; row != NULL; row = row->next) {
         row->row.index = ++i;
     }
+}
+
+void buffer_move_cursor(Buffer *buffer, int dx, int dy) {
+    int next_x = buffer->cursor.x + dx;
+    int next_y = buffer->cursor.y + dy;
+
+    if (next_y < 0) {
+        next_y = 0;
+    } else if (next_y >= buffer->rows_len) {
+        next_y = buffer->rows_len - 1;
+    }
+
+    if (next_y > buffer->cursor.y) {
+        for (int i = buffer->cursor.y; i < next_y; ++i) {
+            buffer->cursor.row = buffer->cursor.row->next;
+        }
+    } else if (next_y < buffer->cursor.y) {
+        for (int i = buffer->cursor.y; i > next_y; --i) {
+            buffer->cursor.row = buffer->cursor.row->prev;
+        }
+    }
+
+    if (next_x < 0) {
+        next_x = 0;
+    } else if (next_x >= buffer->cursor.row->row.content_len) {
+        next_x = buffer->cursor.row->row.content_len - 1;
+    }
+
+    if (buffer->cursor.row->row.content_len == 0) {
+        next_x = 0;
+    }
+
+    buffer->cursor.x = next_x;
+    buffer->cursor.y = next_y;
+    buffer->cursor.c = buffer->cursor.row->row.content[buffer->cursor.x];
 }

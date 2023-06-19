@@ -14,3 +14,14 @@ void app_render(App *app) {
         assert(0 && "unreachable");
     }
 }
+
+void app_update(App *app) {
+    switch (app->view_type) {
+    case VIEW_EDIT:
+        editor_update(&(app->view.editor));
+        break;
+    case VIEW_BROWSE:
+    default:
+        assert(0 && "unreachable");
+    }
+}

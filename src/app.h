@@ -17,3 +17,4 @@ typedef struct {
 } App;
 
 void app_render(App *app);
+void app_update(App *app);

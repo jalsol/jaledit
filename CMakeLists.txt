@@ -38,6 +38,7 @@ add_executable(${PROJECT_NAME}
     src/buffer.c
     src/editor.c
     src/utils.c
+    src/keybind.c
 )
 
 target_link_libraries(${PROJECT_NAME} raylib)
