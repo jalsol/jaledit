@@ -39,16 +39,24 @@ int buffer_load_file(Buffer *buffer, const char *file_path) {
 
     char line_buffer[1 << 10];
     buffer->rows_len = 0;
+    bool has_trailing_newline = false;
 
     while (fgets(line_buffer, sizeof(line_buffer), fp) != NULL) {
         int line_len = strlen(line_buffer);
+        has_trailing_newline = false;
+
         while (line_len > 0 && line_buffer[line_len - 1] == '\n') {
             line_buffer[--line_len] = '\0';
+            has_trailing_newline = true;
         }
 
         char *line = malloc(line_len + 1);
         memcpy(line, line_buffer, line_len);
         buffer_insert_row(buffer, buffer->rows_len, line, line_len);
+    }
+
+    if (has_trailing_newline) {
+        buffer_insert_row(buffer, buffer->rows_len, "", 0);
     }
 
     fclose(fp);
@@ -100,5 +108,13 @@ RowNode *buffer_insert_row(Buffer *buffer, int index, const char *line,
     }
 
     ++buffer->rows_len;
+    buffer_relabel_rows(buffer);
     return new_node;
+}
+
+void buffer_relabel_rows(Buffer *buffer) {
+    int i = 0;
+    for (RowNode *row = buffer->rows_head; row != NULL; row = row->next) {
+        row->row.index = ++i;
+    }
 }

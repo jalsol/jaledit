@@ -24,3 +24,16 @@ Vector2 measure_text(const char *text, float font_size, float spacing) {
     }
     return MeasureTextEx(*utils_font, text, font_size, spacing);
 }
+
+int number_len(int n) {
+    if (n == 0) {
+        return 1;
+    }
+
+    int len = 0;
+    do {
+        len++;
+        n /= 10;
+    } while (n > 0);
+    return len;
+}

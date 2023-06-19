@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 typedef struct {
+    int index;
     int content_len;
     char *content;
 } Row;
@@ -37,3 +38,4 @@ RowNode *buffer_find_row(Buffer *buffer, int index);
 RowNode *buffer_insert_row(Buffer *buffer, int index, const char *line,
                            int line_len);
 // RowNode *buffer_delete_row(Buffer *buffer, int index);
+void buffer_relabel_rows(Buffer *buffer);
