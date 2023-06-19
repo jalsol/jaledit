@@ -31,6 +31,7 @@ typedef struct {
 } Buffer;
 
 Buffer buffer_construct(const char *file_path);
+void buffer_destruct(Buffer *buffer);
 int buffer_load_file(Buffer *buffer, const char *file_path);
 RowNode *buffer_find_row(Buffer *buffer, int index);
 RowNode *buffer_insert_row(Buffer *buffer, int index, const char *line,

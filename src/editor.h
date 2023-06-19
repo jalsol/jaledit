@@ -17,4 +17,5 @@ typedef struct {
 static Editor editor;
 
 Editor editor_construct(const char *file_path);
-void editor_render(Editor editor);
+void editor_destruct(Editor *editor);
+void editor_render(Editor *editor);

@@ -10,5 +10,4 @@ static Font *utils_font = NULL;
 void draw_text(const char *text, Vector2 pos, Color color, float font_size,
                float spacing);
 
-void measure_text(const char *text, Vector2 pos, Color color, float font_size,
-                  float spacing);
+Vector2 measure_text(const char *text, float font_size, float spacing);

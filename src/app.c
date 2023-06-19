@@ -4,10 +4,10 @@
 
 #include "editor.h"
 
-void app_render(App app) {
-    switch (app.view_type) {
+void app_render(App *app) {
+    switch (app->view_type) {
     case VIEW_EDIT:
-        editor_render(app.view.editor);
+        editor_render(&(app->view.editor));
         break;
     case VIEW_BROWSE:
     default:

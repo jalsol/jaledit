@@ -3,10 +3,11 @@
 #include "app.h"
 #include "constants.h"
 #include "raylib.h"
-#include "utils.h"
 
-int main() {
+int main(int argc, char **argv) {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "jaledit");
+
+    editor = editor_construct(argv[1]);
 
     App app;
     app.view_type = VIEW_EDIT;
@@ -15,9 +16,10 @@ int main() {
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        app_render(app);
+        app_render(&app);
         EndDrawing();
     }
+    CloseWindow();
 
-    free(utils_font);
+    editor_destruct(&editor);
 }

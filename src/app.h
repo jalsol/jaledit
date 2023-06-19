@@ -16,4 +16,4 @@ typedef struct {
     View view;
 } App;
 
-void app_render(App app);
+void app_render(App *app);

@@ -16,12 +16,11 @@ void draw_text(const char *text, Vector2 pos, Color color, float font_size,
     DrawTextEx(*utils_font, text, pos, font_size, spacing, color);
 }
 
-void measure_text(const char *text, Vector2 pos, Color color, float font_size,
-                  float spacing) {
+Vector2 measure_text(const char *text, float font_size, float spacing) {
     if (utils_font == NULL) {
         utils_font = malloc(sizeof(Font));
         *utils_font = LoadFontEx("data/JetBrainsMonoNerdFont-Regular.ttf",
                                  FONT_SIZE, NULL, 0);
     }
-    MeasureTextEx(*utils_font, text, font_size, spacing);
+    return MeasureTextEx(*utils_font, text, font_size, spacing);
 }

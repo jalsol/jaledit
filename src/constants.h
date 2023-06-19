@@ -12,4 +12,5 @@ enum Limit {
 
 enum {
     FONT_SIZE = 20,
+    MARGIN = 20,
 };

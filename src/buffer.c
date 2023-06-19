@@ -1,7 +1,8 @@
 #include "buffer.h"
 
+#include "utils.h"
+
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 Buffer buffer_construct(const char *file_path) {
@@ -15,6 +16,15 @@ Buffer buffer_construct(const char *file_path) {
     }
 
     return buffer;
+}
+
+void buffer_destruct(Buffer *buffer) {
+    for (RowNode *row = buffer->rows_head; row != NULL;) {
+        RowNode *next = row->next;
+        free(row->row.content);
+        free(row);
+        row = next;
+    }
 }
 
 int buffer_load_file(Buffer *buffer, const char *file_path) {
@@ -60,6 +70,7 @@ RowNode *buffer_insert_row(Buffer *buffer, int index, const char *line,
     Row new_row;
     new_row.content_len = line_len;
     new_row.content = malloc(line_len + 1);
+    new_row.content[line_len] = '\0';
     memcpy(new_row.content, line, line_len);
 
     RowNode *new_node = malloc(sizeof(RowNode));
@@ -71,9 +82,11 @@ RowNode *buffer_insert_row(Buffer *buffer, int index, const char *line,
         buffer->rows_head = buffer->rows_tail = new_node;
     } else if (index == 0) {
         new_node->next = buffer->rows_head;
+        buffer->rows_head->prev = new_node;
         buffer->rows_head = new_node;
     } else if (index >= buffer->rows_len) {
         new_node->prev = buffer->rows_tail;
+        buffer->rows_tail->next = new_node;
         buffer->rows_tail = new_node;
     } else {
         RowNode *right_pivot = buffer_find_row(buffer, index);
