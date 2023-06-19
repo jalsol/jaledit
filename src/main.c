@@ -3,6 +3,7 @@
 #include "app.h"
 #include "constants.h"
 #include "raylib.h"
+#include "utils.h"
 
 int main() {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "jaledit");
@@ -17,4 +18,6 @@ int main() {
         app_render(app);
         EndDrawing();
     }
+
+    free(utils_font);
 }

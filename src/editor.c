@@ -4,6 +4,7 @@
 
 #include "buffer.h"
 #include "raylib.h"
+#include "utils.h"
 
 Editor editor_construct(const char *file_path) {
     Editor editor;
@@ -12,4 +13,6 @@ Editor editor_construct(const char *file_path) {
     return editor;
 }
 
-void editor_render(Editor editor) { DrawText("lmao", 0, 0, 20, BLACK); }
+void editor_render(Editor editor) {
+    draw_text("lmao", (Vector2){0, 0}, BLACK, 20, 0);
+}

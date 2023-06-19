@@ -9,8 +9,8 @@ typedef struct {
 
 typedef struct RowNode {
     Row row;
-    struct RowNode* next;
-    struct RowNode* prev;
+    struct RowNode *next;
+    struct RowNode *prev;
 } RowNode;
 
 typedef struct {
@@ -33,5 +33,6 @@ typedef struct {
 Buffer buffer_construct(const char *file_path);
 int buffer_load_file(Buffer *buffer, const char *file_path);
 RowNode *buffer_find_row(Buffer *buffer, int index);
-RowNode *buffer_insert_row(Buffer *buffer, int index, const char* line, int line_len);
+RowNode *buffer_insert_row(Buffer *buffer, int index, const char *line,
+                           int line_len);
 // RowNode *buffer_delete_row(Buffer *buffer, int index);
