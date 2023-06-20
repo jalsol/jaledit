@@ -15,4 +15,5 @@ enum {
     MARGIN = 20,
     BUFFER_LIMIT = 1 << 10,
     CHAR_LIMIT = 1 << 8,
+    MAX_BUFFER_LINES = 1 << 20,
 };

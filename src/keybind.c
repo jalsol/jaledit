@@ -34,78 +34,38 @@ void keybind_trie_node_destruct(KeybindTrieNode *node) {
 }
 
 void keybind_trie_populate(KeybindTrie *trie) {
-    keybind_trie_insert(trie, "h", KEYBIND_BUFFER_MOVE_CURSOR,
-                        (KeybindHandlerArgs){
-                            .buffer_move_cursor =
-                                {
-                                    .dx = -1,
-                                    .dy = 0,
-                                },
-                        });
-    keybind_trie_insert(trie, "j", KEYBIND_BUFFER_MOVE_CURSOR,
-                        (KeybindHandlerArgs){
-                            .buffer_move_cursor =
-                                {
-                                    .dx = 0,
-                                    .dy = 1,
-                                },
-                        });
-    keybind_trie_insert(trie, "k", KEYBIND_BUFFER_MOVE_CURSOR,
-                        (KeybindHandlerArgs){
-                            .buffer_move_cursor =
-                                {
-                                    .dx = 0,
-                                    .dy = -1,
-                                },
-                        });
-    keybind_trie_insert(trie, "l", KEYBIND_BUFFER_MOVE_CURSOR,
-                        (KeybindHandlerArgs){
-                            .buffer_move_cursor =
-                                {
-                                    .dx = 1,
-                                    .dy = 0,
-                                },
-                        });
-    keybind_trie_insert(trie, "gg", KEYBIND_BUFFER_MOVE_CURSOR,
-                        (KeybindHandlerArgs){
-                            .buffer_move_cursor =
-                                {
-                                    .dx = 0,
-                                    .dy = -INT_MAX,
-                                },
-                        });
-    keybind_trie_insert(trie, "G", KEYBIND_BUFFER_MOVE_CURSOR,
-                        (KeybindHandlerArgs){
-                            .buffer_move_cursor =
-                                {
-                                    .dx = 0,
-                                    .dy = INT_MAX,
-                                },
-                        });
-    keybind_trie_insert(trie, "0", KEYBIND_BUFFER_MOVE_CURSOR,
-                        (KeybindHandlerArgs){
-                            .buffer_move_cursor =
-                                {
-                                    .dx = -INT_MAX,
-                                    .dy = 0,
-                                },
-                        });
-    keybind_trie_insert(trie, "$", KEYBIND_BUFFER_MOVE_CURSOR,
-                        (KeybindHandlerArgs){
-                            .buffer_move_cursor =
-                                {
-                                    .dx = +INT_MAX,
-                                    .dy = 0,
-                                },
-                        });
+    keybind_trie_insert(
+        trie, "h", KEYBIND_BUFFER_MOVE_CURSOR,
+        (KeybindHandlerArgs){.buffer_move_cursor = {.dx = -1, .dy = 0}});
+    keybind_trie_insert(
+        trie, "j", KEYBIND_BUFFER_MOVE_CURSOR,
+        (KeybindHandlerArgs){.buffer_move_cursor = {.dx = 0, .dy = 1}});
+    keybind_trie_insert(
+        trie, "k", KEYBIND_BUFFER_MOVE_CURSOR,
+        (KeybindHandlerArgs){.buffer_move_cursor = {.dx = 0, .dy = -1}});
+    keybind_trie_insert(
+        trie, "l", KEYBIND_BUFFER_MOVE_CURSOR,
+        (KeybindHandlerArgs){.buffer_move_cursor = {.dx = 1, .dy = 0}});
+    keybind_trie_insert(
+        trie, "gg", KEYBIND_BUFFER_MOVE_CURSOR,
+        (KeybindHandlerArgs){
+            .buffer_move_cursor = {.dx = 0, .dy = -MAX_BUFFER_LINES}});
+    keybind_trie_insert(
+        trie, "G", KEYBIND_BUFFER_MOVE_CURSOR,
+        (KeybindHandlerArgs){
+            .buffer_move_cursor = {.dx = 0, .dy = MAX_BUFFER_LINES}});
+    keybind_trie_insert(
+        trie, "0", KEYBIND_BUFFER_MOVE_CURSOR,
+        (KeybindHandlerArgs){
+            .buffer_move_cursor = {.dx = -MAX_BUFFER_LINES, .dy = 0}});
+    keybind_trie_insert(
+        trie, "$", KEYBIND_BUFFER_MOVE_CURSOR,
+        (KeybindHandlerArgs){
+            .buffer_move_cursor = {.dx = MAX_BUFFER_LINES, .dy = 0}});
     keybind_trie_insert(trie, "w", KEYBIND_BUFFER_MOVE_TO_NEXT_WORD,
-                        (KeybindHandlerArgs){
-                            .buffer_move_to_next_word = {},
-                        });
+                        (KeybindHandlerArgs){.void_param = {}});
     keybind_trie_insert(trie, "b", KEYBIND_BUFFER_MOVE_TO_PREV_WORD,
-                        (KeybindHandlerArgs){
-                            .buffer_move_to_prev_word = {},
-                        });
+                        (KeybindHandlerArgs){.void_param = {}});
 }
 
 void keybind_trie_insert(KeybindTrie *trie, const char *sequence,

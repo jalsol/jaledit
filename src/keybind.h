@@ -20,9 +20,7 @@ typedef union {
         int dy;
     } buffer_move_cursor;
     struct {
-    } buffer_move_to_next_word;
-    struct {
-    } buffer_move_to_prev_word;
+    } void_param;
 } KeybindHandlerArgs;
 
 typedef struct KeybindTrieNode {
