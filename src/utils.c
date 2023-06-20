@@ -1,5 +1,6 @@
 #include "utils.h"
 
+#include <ctype.h>
 #include <stdlib.h>
 
 #include "constants.h"
@@ -37,3 +38,5 @@ int number_len(int n) {
     } while (n > 0);
     return len;
 }
+
+bool is_vim_alnum(int c) { return !!isalnum(c) || c == '_' || c == '-'; }

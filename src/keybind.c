@@ -1,6 +1,7 @@
 #include "keybind.h"
 
 #include <assert.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,33 +38,73 @@ void keybind_trie_populate(KeybindTrie *trie) {
                         (KeybindHandlerArgs){
                             .buffer_move_cursor =
                                 {
-                                    .x = -1,
-                                    .y = 0,
+                                    .dx = -1,
+                                    .dy = 0,
                                 },
                         });
     keybind_trie_insert(trie, "j", KEYBIND_BUFFER_MOVE_CURSOR,
                         (KeybindHandlerArgs){
                             .buffer_move_cursor =
                                 {
-                                    .x = 0,
-                                    .y = 1,
+                                    .dx = 0,
+                                    .dy = 1,
                                 },
                         });
     keybind_trie_insert(trie, "k", KEYBIND_BUFFER_MOVE_CURSOR,
                         (KeybindHandlerArgs){
                             .buffer_move_cursor =
                                 {
-                                    .x = 0,
-                                    .y = -1,
+                                    .dx = 0,
+                                    .dy = -1,
                                 },
                         });
     keybind_trie_insert(trie, "l", KEYBIND_BUFFER_MOVE_CURSOR,
                         (KeybindHandlerArgs){
                             .buffer_move_cursor =
                                 {
-                                    .x = 1,
-                                    .y = 0,
+                                    .dx = 1,
+                                    .dy = 0,
                                 },
+                        });
+    keybind_trie_insert(trie, "gg", KEYBIND_BUFFER_MOVE_CURSOR,
+                        (KeybindHandlerArgs){
+                            .buffer_move_cursor =
+                                {
+                                    .dx = 0,
+                                    .dy = -INT_MAX,
+                                },
+                        });
+    keybind_trie_insert(trie, "G", KEYBIND_BUFFER_MOVE_CURSOR,
+                        (KeybindHandlerArgs){
+                            .buffer_move_cursor =
+                                {
+                                    .dx = 0,
+                                    .dy = INT_MAX,
+                                },
+                        });
+    keybind_trie_insert(trie, "0", KEYBIND_BUFFER_MOVE_CURSOR,
+                        (KeybindHandlerArgs){
+                            .buffer_move_cursor =
+                                {
+                                    .dx = -INT_MAX,
+                                    .dy = 0,
+                                },
+                        });
+    keybind_trie_insert(trie, "$", KEYBIND_BUFFER_MOVE_CURSOR,
+                        (KeybindHandlerArgs){
+                            .buffer_move_cursor =
+                                {
+                                    .dx = +INT_MAX,
+                                    .dy = 0,
+                                },
+                        });
+    keybind_trie_insert(trie, "w", KEYBIND_BUFFER_MOVE_TO_NEXT_WORD,
+                        (KeybindHandlerArgs){
+                            .buffer_move_to_next_word = {},
+                        });
+    keybind_trie_insert(trie, "b", KEYBIND_BUFFER_MOVE_TO_PREV_WORD,
+                        (KeybindHandlerArgs){
+                            .buffer_move_to_prev_word = {},
                         });
 }
 

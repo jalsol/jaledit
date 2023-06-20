@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "utils.h"
 
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -20,10 +21,10 @@ Buffer buffer_construct(const char *file_path) {
         buffer_insert_row(&buffer, 0, "", 0);
     }
 
-    buffer.cursor.row = buffer.rows_head;
+    buffer.cursor.row_node = buffer.row_node_head;
 
-    if (buffer.rows_head->row.content_len > 0) {
-        buffer.cursor.c = buffer.rows_head->row.content[0];
+    if (buffer.row_node_head->row.content_len > 0) {
+        buffer.cursor.c = buffer.row_node_head->row.content[0];
     } else {
         buffer.cursor.c = ' ';
     }
@@ -32,11 +33,11 @@ Buffer buffer_construct(const char *file_path) {
 }
 
 void buffer_destruct(Buffer *buffer) {
-    for (RowNode *row = buffer->rows_head; row != NULL;) {
-        RowNode *next = row->next;
-        free(row->row.content);
-        free(row);
-        row = next;
+    for (RowNode *row_node = buffer->row_node_head; row_node != NULL;) {
+        RowNode *next = row_node->next;
+        free(row_node->row.content);
+        free(row_node);
+        row_node = next;
     }
 }
 
@@ -78,9 +79,9 @@ int buffer_load_file(Buffer *buffer, const char *file_path) {
 }
 
 RowNode *buffer_find_row(Buffer *buffer, int index) {
-    RowNode *ptr = buffer->rows_head;
+    RowNode *ptr = buffer->row_node_head;
 
-    for (int i = 0; i < index && ptr != buffer->rows_tail; ++i) {
+    for (int i = 0; i < index && ptr != buffer->row_node_tail; ++i) {
         ptr = ptr->next;
     }
 
@@ -101,15 +102,15 @@ RowNode *buffer_insert_row(Buffer *buffer, int index, const char *line,
     new_node->prev = NULL;
 
     if (buffer->rows_len == 0) {
-        buffer->rows_head = buffer->rows_tail = new_node;
+        buffer->row_node_head = buffer->row_node_tail = new_node;
     } else if (index == 0) {
-        new_node->next = buffer->rows_head;
-        buffer->rows_head->prev = new_node;
-        buffer->rows_head = new_node;
+        new_node->next = buffer->row_node_head;
+        buffer->row_node_head->prev = new_node;
+        buffer->row_node_head = new_node;
     } else if (index >= buffer->rows_len) {
-        new_node->prev = buffer->rows_tail;
-        buffer->rows_tail->next = new_node;
-        buffer->rows_tail = new_node;
+        new_node->prev = buffer->row_node_tail;
+        buffer->row_node_tail->next = new_node;
+        buffer->row_node_tail = new_node;
     } else {
         RowNode *right_pivot = buffer_find_row(buffer, index);
         RowNode *left_pivot = right_pivot->prev;
@@ -128,8 +129,9 @@ RowNode *buffer_insert_row(Buffer *buffer, int index, const char *line,
 
 void buffer_relabel_rows(Buffer *buffer) {
     int idx = 0;
-    for (RowNode *row = buffer->rows_head; row != NULL; row = row->next) {
-        row->row.index = ++idx;
+    for (RowNode *row_node = buffer->row_node_head; row_node != NULL;
+         row_node = row_node->next) {
+        row_node->row.index = ++idx;
     }
 }
 
@@ -145,25 +147,149 @@ void buffer_move_cursor(Buffer *buffer, int dx, int dy) {
 
     if (next_y > buffer->cursor.y) {
         for (int i = buffer->cursor.y; i < next_y; ++i) {
-            buffer->cursor.row = buffer->cursor.row->next;
+            buffer->cursor.row_node = buffer->cursor.row_node->next;
         }
     } else if (next_y < buffer->cursor.y) {
         for (int i = buffer->cursor.y; i > next_y; --i) {
-            buffer->cursor.row = buffer->cursor.row->prev;
+            buffer->cursor.row_node = buffer->cursor.row_node->prev;
         }
     }
 
     if (next_x < 0) {
         next_x = 0;
-    } else if (next_x >= buffer->cursor.row->row.content_len) {
-        next_x = buffer->cursor.row->row.content_len - 1;
+    } else if (next_x >= buffer->cursor.row_node->row.content_len) {
+        next_x = buffer->cursor.row_node->row.content_len - 1;
     }
 
-    if (buffer->cursor.row->row.content_len == 0) {
+    if (buffer->cursor.row_node->row.content_len == 0) {
         next_x = 0;
     }
 
     buffer->cursor.x = next_x;
     buffer->cursor.y = next_y;
-    buffer->cursor.c = buffer->cursor.row->row.content[buffer->cursor.x];
+    buffer->cursor.c = buffer->cursor.row_node->row.content[buffer->cursor.x];
+}
+
+int buffer_move_to_next_char(Buffer *buffer) {
+    int *x = &buffer->cursor.x;
+    int *y = &buffer->cursor.y;
+    RowNode **row_node = &buffer->cursor.row_node;
+    int ret_val = 0;
+
+    if (*x < (*row_node)->row.content_len - 1) {
+        ++*x;
+    } else if (*y < buffer->rows_len - 1) {
+        ++*y;
+        *x = 0;
+        *row_node = (*row_node)->next;
+    } else {
+        *y = buffer->rows_len - 1;
+        *x = (*row_node)->row.content_len - 1;
+        *row_node = buffer->row_node_tail;
+        ret_val = -1;
+    }
+
+    if ((*row_node)->row.content_len == 0) {
+        buffer->cursor.c = ' ';
+    } else {
+        buffer->cursor.c = (*row_node)->row.content[*x];
+    }
+
+    return ret_val;
+}
+
+int buffer_move_to_prev_char(Buffer *buffer) {
+    int *x = &buffer->cursor.x;
+    int *y = &buffer->cursor.y;
+    RowNode **row_node = &buffer->cursor.row_node;
+    int ret_val = 0;
+
+    if (*x > 0) {
+        --*x;
+    } else if (*y > 0) {
+        --*y;
+        *row_node = (*row_node)->prev;
+        *x = (*row_node)->row.content_len - 1;
+    } else {
+        *y = 0;
+        *x = 0;
+        *row_node = buffer->row_node_head;
+        ret_val = -1;
+    }
+
+    if ((*row_node)->row.content_len == 0) {
+        buffer->cursor.c = ' ';
+    } else {
+        buffer->cursor.c = (*row_node)->row.content[*x];
+    }
+
+    return ret_val;
+}
+
+void buffer_move_to_next_word(Buffer *buffer) {
+    int *x = &buffer->cursor.x;
+    int *y = &buffer->cursor.y;
+    RowNode **row_node = &buffer->cursor.row_node;
+
+    bool alnum_word = !!isalnum(buffer->cursor.c);
+    bool punct_word = !!ispunct(buffer->cursor.c);
+
+    // if already in word, move to end of word
+    if (alnum_word) {
+        while (isalnum(buffer->cursor.c)) {
+            buffer_move_to_next_char(buffer);
+        }
+    } else if (punct_word) {
+        buffer_move_to_next_char(buffer);
+        if (ispunct(buffer->cursor.c)) {
+            return;
+        }
+    }
+
+    if (isblank(buffer->cursor.c)) {
+        while (isblank(buffer->cursor.c)) {
+            buffer_move_to_next_char(buffer);
+        }
+    }
+}
+
+void buffer_move_to_prev_word(Buffer *buffer) {
+    int *x = &buffer->cursor.x;
+    int *y = &buffer->cursor.y;
+    RowNode **row_node = &buffer->cursor.row_node;
+
+    buffer_move_to_prev_char(buffer);
+
+    while (isblank(buffer->cursor.c)) {
+        buffer_move_to_prev_char(buffer);
+    }
+
+    bool alnum_word = !!isalnum(buffer_peak_prev_char(buffer));
+    bool punct_word = !!ispunct(buffer_peak_prev_char(buffer));
+
+    // if already in word, move to beginning of word
+    if (alnum_word) {
+        while (isalnum(buffer_peak_prev_char(buffer))) {
+            buffer_move_to_prev_char(buffer);
+        }
+    } else if (punct_word) {
+        buffer_move_to_prev_char(buffer);
+        if (ispunct(buffer_peak_prev_char(buffer))) {
+            return;
+        }
+    }
+}
+
+char buffer_peak_prev_char(Buffer *buffer) {
+    int x = buffer->cursor.x;
+    int y = buffer->cursor.y;
+    RowNode *row_node = buffer->cursor.row_node;
+
+    if (x > 0) {
+        return row_node->row.content[x - 1];
+    } else if (y > 0) {
+        return row_node->prev->row.content[row_node->prev->row.content_len - 1];
+    } else {
+        return ' ';
+    }
 }

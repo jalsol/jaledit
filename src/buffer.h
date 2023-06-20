@@ -18,13 +18,13 @@ typedef struct {
     int x;
     int y;
     char c;
-    RowNode *row;
+    RowNode *row_node;
 } Cursor;
 
 typedef struct {
     const char *file_path;
 
-    RowNode *rows_head, *rows_tail;
+    RowNode *row_node_head, *row_node_tail;
     int rows_len;
 
     int offset_x;
@@ -42,4 +42,10 @@ RowNode *buffer_insert_row(Buffer *buffer, int index, const char *line,
 // RowNode *buffer_delete_row(Buffer *buffer, int index);
 void buffer_relabel_rows(Buffer *buffer);
 
+char buffer_peak_prev_char(Buffer *buffer);
+
 void buffer_move_cursor(Buffer *buffer, int dx, int dy);
+int buffer_move_to_next_char(Buffer *buffer);
+int buffer_move_to_prev_char(Buffer *buffer);
+void buffer_move_to_next_word(Buffer *buffer);
+void buffer_move_to_prev_word(Buffer *buffer);

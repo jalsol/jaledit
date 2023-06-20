@@ -10,13 +10,19 @@
 typedef enum {
     KEYBIND_NONE,
     KEYBIND_BUFFER_MOVE_CURSOR,
+    KEYBIND_BUFFER_MOVE_TO_NEXT_WORD,
+    KEYBIND_BUFFER_MOVE_TO_PREV_WORD,
 } KeybindHandlerType;
 
 typedef union {
     struct {
-        int x;
-        int y;
+        int dx;
+        int dy;
     } buffer_move_cursor;
+    struct {
+    } buffer_move_to_next_word;
+    struct {
+    } buffer_move_to_prev_word;
 } KeybindHandlerArgs;
 
 typedef struct KeybindTrieNode {

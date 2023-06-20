@@ -7,6 +7,7 @@
 extern Editor editor;
 
 int main(int argc, char **argv) {
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "jaledit");
     SetExitKey(KEY_NULL);
 

@@ -29,18 +29,24 @@ void editor_render(Editor *editor) {
     int max_line_number_size = number_len(editor->buffer.rows_len);
     int offset_from_number = 2;
 
+    // draw cursorline
+    int cursorline_y = MARGIN + editor->buffer.cursor.y * line_height;
+    DrawRectangle(0, cursorline_y, GetScreenWidth(), line_height,
+                  ColorAlpha(GRAY, 0.2f));
+
+    // draw text and line numbers
     int y = MARGIN;
-    for (RowNode *row = editor->buffer.rows_head; row != NULL;
-         row = row->next) {
+    for (RowNode *row_node = editor->buffer.row_node_head; row_node != NULL;
+         row_node = row_node->next) {
         const char *line_text =
             TextFormat("%-*d%s", max_line_number_size + offset_from_number,
-                       row->row.index, row->row.content);
+                       row_node->row.index, row_node->row.content);
 
         draw_text(line_text, (Vector2){MARGIN, y}, BLACK, FONT_SIZE, 0);
         y += line_height;
     }
 
-    // Draw block cursor
+    // draw block cursor
     int cursor_x = MARGIN + (max_line_number_size + offset_from_number +
                              editor->buffer.cursor.x) *
                                 char_size.x;
@@ -64,10 +70,15 @@ void editor_update(Editor *editor) {
 }
 
 void editor_update_normal_mode(Editor *editor) {
+    // bool shift = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
     char c = GetCharPressed();
-    if (c != '\0') {
-        editor_keybind_trie_step(editor, c);
+
+    if (c == '\0') {
+        return;
     }
+
+    printf("key pressed: %c\n", c);
+    editor_keybind_trie_step(editor, c);
 }
 
 void editor_update_insert_mode(Editor *editor) {}
@@ -89,8 +100,16 @@ void editor_keybind_trie_step(Editor *editor, char chr) {
     switch ((*ptr)->handler_type) {
     case KEYBIND_BUFFER_MOVE_CURSOR: {
         KeybindHandlerArgs *args = &(*ptr)->handler_args;
-        buffer_move_cursor(&editor->buffer, args->buffer_move_cursor.x,
-                           args->buffer_move_cursor.y);
+        buffer_move_cursor(&editor->buffer, args->buffer_move_cursor.dx,
+                           args->buffer_move_cursor.dy);
+        break;
+    }
+    case KEYBIND_BUFFER_MOVE_TO_NEXT_WORD: {
+        buffer_move_to_next_word(&editor->buffer);
+        break;
+    }
+    case KEYBIND_BUFFER_MOVE_TO_PREV_WORD: {
+        buffer_move_to_prev_word(&editor->buffer);
         break;
     }
     default:
