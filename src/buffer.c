@@ -88,8 +88,7 @@ RowNode *buffer_find_row(Buffer *buffer, int index) {
     return ptr;
 }
 
-RowNode *buffer_insert_row(Buffer *buffer, int index, const char *line,
-                           int line_len) {
+RowNode *buffer_insert_row(Buffer *buffer, int index, const char *line, int line_len) {
     Row new_row;
     new_row.content_len = line_len;
     new_row.content = malloc(line_len + 1);

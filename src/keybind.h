@@ -40,5 +40,4 @@ void keybind_trie_destruct(KeybindTrie *trie);
 void keybind_trie_populate(KeybindTrie *trie);
 
 void keybind_trie_insert(KeybindTrie *trie, const char *sequence,
-                         KeybindHandlerType handler_type,
-                         KeybindHandlerArgs handler_args);
+                         KeybindHandlerType handler_type, ...);

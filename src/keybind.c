@@ -34,43 +34,20 @@ void keybind_trie_node_destruct(KeybindTrieNode *node) {
 }
 
 void keybind_trie_populate(KeybindTrie *trie) {
-    keybind_trie_insert(
-        trie, "h", KEYBIND_BUFFER_MOVE_CURSOR,
-        (KeybindHandlerArgs){.buffer_move_cursor = {.dx = -1, .dy = 0}});
-    keybind_trie_insert(
-        trie, "j", KEYBIND_BUFFER_MOVE_CURSOR,
-        (KeybindHandlerArgs){.buffer_move_cursor = {.dx = 0, .dy = 1}});
-    keybind_trie_insert(
-        trie, "k", KEYBIND_BUFFER_MOVE_CURSOR,
-        (KeybindHandlerArgs){.buffer_move_cursor = {.dx = 0, .dy = -1}});
-    keybind_trie_insert(
-        trie, "l", KEYBIND_BUFFER_MOVE_CURSOR,
-        (KeybindHandlerArgs){.buffer_move_cursor = {.dx = 1, .dy = 0}});
-    keybind_trie_insert(
-        trie, "gg", KEYBIND_BUFFER_MOVE_CURSOR,
-        (KeybindHandlerArgs){
-            .buffer_move_cursor = {.dx = 0, .dy = -MAX_BUFFER_LINES}});
-    keybind_trie_insert(
-        trie, "G", KEYBIND_BUFFER_MOVE_CURSOR,
-        (KeybindHandlerArgs){
-            .buffer_move_cursor = {.dx = 0, .dy = MAX_BUFFER_LINES}});
-    keybind_trie_insert(
-        trie, "0", KEYBIND_BUFFER_MOVE_CURSOR,
-        (KeybindHandlerArgs){
-            .buffer_move_cursor = {.dx = -MAX_BUFFER_LINES, .dy = 0}});
-    keybind_trie_insert(
-        trie, "$", KEYBIND_BUFFER_MOVE_CURSOR,
-        (KeybindHandlerArgs){
-            .buffer_move_cursor = {.dx = MAX_BUFFER_LINES, .dy = 0}});
-    keybind_trie_insert(trie, "w", KEYBIND_BUFFER_MOVE_TO_NEXT_WORD,
-                        (KeybindHandlerArgs){.void_param = {}});
-    keybind_trie_insert(trie, "b", KEYBIND_BUFFER_MOVE_TO_PREV_WORD,
-                        (KeybindHandlerArgs){.void_param = {}});
+    keybind_trie_insert(trie, "h", KEYBIND_BUFFER_MOVE_CURSOR, -1, 0);
+    keybind_trie_insert(trie, "j", KEYBIND_BUFFER_MOVE_CURSOR, 0, 1);
+    keybind_trie_insert(trie, "k", KEYBIND_BUFFER_MOVE_CURSOR, 0, -1);
+    keybind_trie_insert(trie, "l", KEYBIND_BUFFER_MOVE_CURSOR, 1, 0);
+    keybind_trie_insert(trie, "gg", KEYBIND_BUFFER_MOVE_CURSOR, 0, -MAX_BUFFER_LINES);
+    keybind_trie_insert(trie, "G", KEYBIND_BUFFER_MOVE_CURSOR, 0, MAX_BUFFER_LINES);
+    keybind_trie_insert(trie, "0", KEYBIND_BUFFER_MOVE_CURSOR, -MAX_BUFFER_LINES, 0);
+    keybind_trie_insert(trie, "$", KEYBIND_BUFFER_MOVE_CURSOR, MAX_BUFFER_LINES, 0);
+    keybind_trie_insert(trie, "w", KEYBIND_BUFFER_MOVE_TO_NEXT_WORD);
+    keybind_trie_insert(trie, "b", KEYBIND_BUFFER_MOVE_TO_PREV_WORD);
 }
 
 void keybind_trie_insert(KeybindTrie *trie, const char *sequence,
-                         KeybindHandlerType handler_type,
-                         KeybindHandlerArgs handler_args) {
+                         KeybindHandlerType handler_type, ...) {
     KeybindTrieNode *node = trie->root;
     size_t seq_len = strlen(sequence);
 
@@ -84,5 +61,21 @@ void keybind_trie_insert(KeybindTrie *trie, const char *sequence,
     }
 
     node->handler_type = handler_type;
-    node->handler_args = handler_args;
+
+    va_list args;
+    va_start(args, handler_type);
+
+    switch (handler_type) {
+    case KEYBIND_BUFFER_MOVE_CURSOR:
+        node->handler_args.buffer_move_cursor.dx = va_arg(args, int);
+        node->handler_args.buffer_move_cursor.dy = va_arg(args, int);
+        break;
+    case KEYBIND_BUFFER_MOVE_TO_NEXT_WORD:
+    case KEYBIND_BUFFER_MOVE_TO_PREV_WORD:
+        break;
+    default:
+        assert(0 && "Invalid handler type");
+    }
+
+    va_end(args);
 }

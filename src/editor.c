@@ -31,13 +31,16 @@ void editor_render(Editor *editor) {
 
     // draw cursorline
     int cursorline_y = MARGIN + editor->buffer.cursor.y * line_height;
-    DrawRectangle(0, cursorline_y, GetScreenWidth(), line_height,
-                  ColorAlpha(GRAY, 0.2f));
+    DrawRectangle(0, cursorline_y, GetScreenWidth(), line_height, ColorAlpha(GRAY, 0.2f));
 
     // draw text and line numbers
     int y = MARGIN;
     for (RowNode *row_node = editor->buffer.row_node_head; row_node != NULL;
          row_node = row_node->next) {
+        if (y > GetScreenHeight()) {
+            break;
+        }
+
         const char *line_text =
             TextFormat("%-*d%s", max_line_number_size + offset_from_number,
                        row_node->row.index, row_node->row.content);
@@ -47,13 +50,13 @@ void editor_render(Editor *editor) {
     }
 
     // draw block cursor
-    int cursor_x = MARGIN + (max_line_number_size + offset_from_number +
-                             editor->buffer.cursor.x) *
-                                char_size.x;
+    int cursor_x =
+        MARGIN + (max_line_number_size + offset_from_number + editor->buffer.cursor.x) *
+                     char_size.x;
     int cursor_y = MARGIN + editor->buffer.cursor.y * line_height;
     DrawRectangle(cursor_x, cursor_y, line_width, line_height, BLACK);
-    draw_text(TextFormat("%c", editor->buffer.cursor.c),
-              (Vector2){cursor_x, cursor_y}, WHITE, FONT_SIZE, 0);
+    draw_text(TextFormat("%c", editor->buffer.cursor.c), (Vector2){cursor_x, cursor_y},
+              WHITE, FONT_SIZE, 0);
 }
 
 void editor_update(Editor *editor) {
