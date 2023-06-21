@@ -263,19 +263,13 @@ void buffer_move_to_prev_word(Buffer *buffer) {
         buffer_move_to_prev_char(buffer);
     }
 
-    bool alnum_word = !!isalnum(buffer_peak_prev_char(buffer));
-    bool punct_word = !!ispunct(buffer_peak_prev_char(buffer));
+    if (ispunct(buffer->cursor.c)) {
+        return;
+    }
 
     // if already in word, move to beginning of word
-    if (alnum_word) {
-        while (isalnum(buffer_peak_prev_char(buffer))) {
-            buffer_move_to_prev_char(buffer);
-        }
-    } else if (punct_word) {
+    while (isalnum(buffer_peak_prev_char(buffer))) {
         buffer_move_to_prev_char(buffer);
-        if (ispunct(buffer_peak_prev_char(buffer))) {
-            return;
-        }
     }
 }
 
