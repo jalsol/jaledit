@@ -7,9 +7,11 @@
 extern Editor editor;
 
 int main(int argc, char **argv) {
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "jaledit");
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_VSYNC_HINT);
     SetExitKey(KEY_NULL);
+    SetTargetFPS(144);
+
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "jaledit");
 
     if (argc >= 2) {
         editor = editor_construct(argv[1]);
