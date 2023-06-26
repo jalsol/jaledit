@@ -52,7 +52,7 @@ void keybind_trie_insert(KeybindTrie *trie, const char *sequence,
     size_t seq_len = strlen(sequence);
 
     for (size_t i = 0; i < seq_len; i++) {
-        char c = sequence[i];
+        int c = sequence[i];
         if (node->children[c] == NULL) {
             node->children[c] = malloc(sizeof(KeybindTrieNode));
             memset(node->children[c], 0, sizeof(KeybindTrieNode));

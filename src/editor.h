@@ -3,7 +3,7 @@
 #include "buffer.h"
 #include "keybind.h"
 
-typedef enum {
+typedef enum Mode {
     MODE_NORMAL,
     MODE_COMMAND,
     MODE_INSERT,
@@ -22,5 +22,5 @@ void editor_destruct(Editor *editor);
 void editor_render(Editor *editor);
 void editor_update(Editor *editor);
 void editor_update_normal_mode(Editor *editor);
-void editor_update_insert_mode(Editor *editor);
+// void editor_update_insert_mode(Editor *editor);
 void editor_keybind_trie_step(Editor *editor, char chr);

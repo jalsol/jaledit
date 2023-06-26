@@ -39,8 +39,13 @@ add_executable(${PROJECT_NAME}
     src/editor.c
     src/utils.c
     src/keybind.c
+    src/piece_table.c
+    src/piece.c
+    src/vector.c
 )
 
 target_link_libraries(${PROJECT_NAME} raylib)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC external)
+
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
