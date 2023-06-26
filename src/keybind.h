@@ -7,19 +7,20 @@
 #include "buffer.h"
 #include "constants.h"
 
-typedef enum {
+typedef enum KeybindHandlerType {
     KEYBIND_NONE,
     KEYBIND_BUFFER_MOVE_CURSOR,
     KEYBIND_BUFFER_MOVE_TO_NEXT_WORD,
     KEYBIND_BUFFER_MOVE_TO_PREV_WORD,
 } KeybindHandlerType;
 
-typedef union {
-    struct {
+typedef union KeybindHandlerArgs {
+    struct buffer_move_cursor {
         int dx;
         int dy;
     } buffer_move_cursor;
-    struct {
+    struct void_param {
+        char _;
     } void_param;
 } KeybindHandlerArgs;
 
@@ -29,7 +30,7 @@ typedef struct KeybindTrieNode {
     KeybindHandlerArgs handler_args;
 } KeybindTrieNode;
 
-typedef struct {
+typedef struct KeybindTrie {
     KeybindTrieNode *root;
     KeybindTrieNode *ptr;
 } KeybindTrie;

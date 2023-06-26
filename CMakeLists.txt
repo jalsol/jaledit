@@ -44,3 +44,5 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} raylib)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC external)
+
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)

@@ -226,10 +226,6 @@ int buffer_move_to_prev_char(Buffer *buffer) {
 }
 
 void buffer_move_to_next_word(Buffer *buffer) {
-    int *x = &buffer->cursor.x;
-    int *y = &buffer->cursor.y;
-    RowNode **row_node = &buffer->cursor.row_node;
-
     bool alnum_word = !!isalnum(buffer->cursor.c);
     bool punct_word = !!ispunct(buffer->cursor.c);
 
@@ -253,10 +249,6 @@ void buffer_move_to_next_word(Buffer *buffer) {
 }
 
 void buffer_move_to_prev_word(Buffer *buffer) {
-    int *x = &buffer->cursor.x;
-    int *y = &buffer->cursor.y;
-    RowNode **row_node = &buffer->cursor.row_node;
-
     buffer_move_to_prev_char(buffer);
 
     while (isblank(buffer->cursor.c)) {

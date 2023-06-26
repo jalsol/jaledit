@@ -65,8 +65,8 @@ void editor_update(Editor *editor) {
         editor_update_normal_mode(editor);
         break;
     case MODE_INSERT:
-        editor_update_insert_mode(editor);
-        break;
+        // editor_update_insert_mode(editor);
+        // break;
     default:
         assert(0 && "unreachable");
     }
@@ -84,17 +84,17 @@ void editor_update_normal_mode(Editor *editor) {
     editor_keybind_trie_step(editor, c);
 }
 
-void editor_update_insert_mode(Editor *editor) {}
+// void editor_update_insert_mode(Editor *editor) {}
 
 void editor_keybind_trie_step(Editor *editor, char chr) {
     KeybindTrieNode **ptr = &(editor->keybind_trie.ptr);
 
-    if (*ptr == NULL || (*ptr)->children[chr] == NULL) {
+    if (*ptr == NULL || (*ptr)->children[(int)chr] == NULL) {
         *ptr = editor->keybind_trie.root;
         return;
     }
 
-    *ptr = (*ptr)->children[chr];
+    *ptr = (*ptr)->children[(int)chr];
 
     if ((*ptr)->handler_type == KEYBIND_NONE) {
         return;
