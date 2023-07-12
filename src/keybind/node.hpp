@@ -4,6 +4,7 @@
 #include "utils.hpp"
 
 #include <array>
+#include <concepts>
 #include <tuple>
 
 namespace keybind {
@@ -20,7 +21,7 @@ protected:
     std::array<Node*, constants::char_limit> m_children{};
 };
 
-template<typename Func, typename... Args>
+template<std::invocable Func, typename... Args>
 class FuncNode : public Node {
 public:
     FuncNode(Node&& old_node, Func func, Args... args);
