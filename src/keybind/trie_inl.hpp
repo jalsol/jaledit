@@ -1,5 +1,7 @@
 #pragma once
 
+#include "keybind/trie.hpp"
+
 #include "keybind/node.hpp"
 
 #include "utils.hpp"
