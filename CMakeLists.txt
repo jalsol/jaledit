@@ -37,6 +37,8 @@ add_executable(${PROJECT_NAME}
 
     src/keybind/node.cpp
     src/keybind/trie.cpp
+
+    src/buffer/node.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} raylib)
