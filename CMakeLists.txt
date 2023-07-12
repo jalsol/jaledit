@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
-project(jaledit VERSION 0.1.0 LANGUAGES C)
+project(jaledit VERSION 0.1.0 LANGUAGES CXX)
 
-set(CMAKE_C_STANDARD 23)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_BUILD_TYPE Debug)
 
@@ -33,7 +33,10 @@ endif()
 include_directories(src)
 
 add_executable(${PROJECT_NAME}
-    src/main.c
+    src/main.cpp
+
+    src/keybind/node.cpp
+    src/keybind/trie.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} raylib)
