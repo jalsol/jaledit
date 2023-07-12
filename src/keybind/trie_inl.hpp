@@ -20,8 +20,8 @@ void Trie::insert(std::string_view keyseq, Func func, Args... args) {
         current = current->m_children[c];
     }
 
-    Node* new_node =
-        new FuncNode<Func, Args...>(std::move(*current), func, args...);
+    Node* new_node
+        = new FuncNode<Func, Args...>(std::move(*current), func, args...);
     current->get_parent()->m_children[keyseq.back()] = new_node;
     delete current;
 }
