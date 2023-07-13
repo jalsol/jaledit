@@ -5,7 +5,8 @@
 #include <string>
 #include <vector>
 
-Branch::Branch(Handle left, Handle right) : m_left{left}, m_right{right} {
+Branch::Branch(const Handle& left, const Handle& right)
+    : m_left{left}, m_right{right} {
     m_weight = m_left->length();
     m_length = m_weight + (m_right ? m_right->length() : 0);
 
