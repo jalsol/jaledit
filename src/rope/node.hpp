@@ -9,7 +9,6 @@
 class Node {
 public:
     using Handle = std::shared_ptr<Node>;
-    virtual ~Node() = 0;
 
     virtual char operator[](std::size_t index) const = 0;
     virtual std::string substr(std::size_t start, std::size_t length) const = 0;
@@ -29,7 +28,6 @@ protected:
 class Leaf : public Node {
 public:
     Leaf(const std::string& text);
-    ~Leaf() override = default;
 
     char operator[](std::size_t index) const override;
     std::string substr(std::size_t start, std::size_t length) const override;
@@ -47,11 +45,8 @@ private:
 
 class Branch : public Node {
 public:
-    using Handle = std::shared_ptr<Branch>;
-
-    Branch(Handle left, Handle right);
+    Branch(const Handle& left, const Handle& right);
     Branch(const Branch& other);
-    ~Branch() override = default;
 
     char operator[](std::size_t index) const override;
     std::string substr(std::size_t start, std::size_t length) const override;
@@ -64,6 +59,6 @@ private:
     using Node::m_depth;
     using Node::m_length;
     using Node::m_weight;
-    Handle m_left{};
-    Handle m_right{};
+    Node::Handle m_left{};
+    Node::Handle m_right{};
 };
