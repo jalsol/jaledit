@@ -9,7 +9,7 @@
 void Editor::render() {
     Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
     const int line_height = constants::font_size + 2;
-    const int line_width = char_size.x;
+    const std::size_t line_width = char_size.x;
 
     const auto& buffer = m_buffers[m_buffer_id];
     const auto& cursor = buffer.cursor();
@@ -22,9 +22,10 @@ void Editor::render() {
     const int window_height = GetScreenHeight();
 
     // draw cursorline
-    const int cursorline_y = constants::margin + cursor.line * line_height;
+    const std::size_t cursorline_y
+        = constants::margin + cursor.line * line_height;
     DrawRectangle(0, cursorline_y, GetScreenWidth(), line_height,
-                  ColorAlpha(GRAY, 0.2f));
+                  ColorAlpha(GRAY, 0.2F));
 
     // draw text and line numbers
     float y = constants::margin - line_height;

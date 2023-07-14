@@ -20,19 +20,6 @@ Vector2 measure_text(const char* text, float font_size, float spacing) {
     return MeasureTextEx(font, text, font_size, spacing);
 }
 
-int number_len(int n) {
-    if (n == 0) {
-        return 1;
-    }
-
-    int len = 0;
-    do {
-        len++;
-        n /= 10;
-    } while (n > 0);
-    return len;
-}
-
 bool is_vim_alnum(int c) { return !!std::isalnum(c) || c == '_' || c == '-'; }
 
 } // namespace utils

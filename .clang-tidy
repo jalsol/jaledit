@@ -13,4 +13,8 @@ Checks: "
     -cppcoreguidelines-owning-memory,
     -modernize-use-trailing-return-type,
     -modernize-use-nodiscard,
+    -readability-identifier-length,
+    -cppcoreguidelines-pro-bounds-constant-array-index,
+    -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+    -cppcoreguidelines-pro-type-vararg,
 "

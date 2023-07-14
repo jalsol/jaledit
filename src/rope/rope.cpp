@@ -6,9 +6,7 @@ Rope::Rope() : Rope{""} {}
 
 Rope::Rope(const std::string& text) : m_root{std::make_shared<Leaf>(text)} {}
 
-Rope::Rope(const Rope& other) : m_root{other.m_root} {}
-
-Rope::Rope(const Handle& root) : m_root{root} {}
+Rope::Rope(Handle root) : m_root{std::move(root)} {}
 
 std::string Rope::to_string() const { return m_root->to_string(); }
 
@@ -109,11 +107,6 @@ std::size_t Rope::find_line_start(std::size_t index) const {
 }
 
 std::size_t Rope::line_count() const { return m_root->lfcnt() + 1; }
-
-Rope& Rope::operator=(const Rope& other) {
-    m_root = other.m_root;
-    return *this;
-}
 
 bool Rope::operator==(const Rope& other) const {
     return m_root->to_string() == other.m_root->to_string();

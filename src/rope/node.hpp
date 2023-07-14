@@ -16,6 +16,7 @@ public:
     virtual std::pair<Handle, Handle> split(std::size_t index) const = 0;
     virtual std::vector<Handle> leaves() const = 0;
     virtual std::size_t find_line_start(std::size_t line_index) const = 0;
+    virtual ~Node() = default;
 
     std::size_t length() const;
     std::size_t depth() const;
@@ -34,6 +35,7 @@ protected:
 class Leaf : public Node {
 public:
     Leaf(const std::string& text);
+    ~Leaf() override = default;
 
     char operator[](std::size_t index) const override;
     std::string substr(std::size_t start, std::size_t length) const override;
@@ -58,8 +60,9 @@ private:
 
 class Branch : public Node {
 public:
-    Branch(const Handle& left, const Handle& right);
+    Branch(Handle left, Handle right);
     Branch(const Branch& other);
+    ~Branch() override = default;
 
     char operator[](std::size_t index) const override;
     std::string substr(std::size_t start, std::size_t length) const override;

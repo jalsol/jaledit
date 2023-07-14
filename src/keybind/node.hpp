@@ -12,9 +12,10 @@ namespace keybind {
 class Node {
 public:
     void set_parent(Node* parent);
-    Node* get_parent() const;
-    std::array<Node*, constants::char_limit>& get_children();
-    std::array<Node*, constants::char_limit> get_children() const;
+    Node* parent() const;
+
+    std::array<Node*, constants::char_limit>& children();
+    const std::array<Node*, constants::char_limit>& children() const;
 
 protected:
     Node* m_parent{};
@@ -30,6 +31,9 @@ public:
 private:
     Func m_func;
     std::tuple<Args...> m_args;
+
+    using Node::m_children;
+    using Node::m_parent;
 };
 
 } // namespace keybind

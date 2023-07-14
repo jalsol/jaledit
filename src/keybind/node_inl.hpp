@@ -10,11 +10,11 @@ namespace keybind {
 template<std::invocable Func, typename... Args>
 FuncNode<Func, Args...>::FuncNode(Node&& old_node, Func func, Args... args)
     : m_func{func}, m_args{args...} {
-    m_parent = old_node.m_parent;
-    m_children = std::move(old_node.m_children);
+    m_parent = old_node.parent();
+    m_children = std::move(old_node.children());
 
-    for (auto child : m_children) {
-        if (child) {
+    for (auto* child : m_children) {
+        if (child != nullptr) {
             child->m_parent = this;
         }
     }
