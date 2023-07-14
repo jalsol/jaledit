@@ -1,6 +1,5 @@
-#include <stdio.h>
-
 #include "constants.hpp"
+#include "editor.hpp"
 #include "raylib.h"
 
 int main(int argc, char** argv) {
@@ -8,11 +7,20 @@ int main(int argc, char** argv) {
     SetExitKey(KEY_NULL);
     SetTargetFPS(144);
 
+    Editor editor;
+
+    if (argc > 1) {
+        editor.open(argv[1]);
+    }
+
     InitWindow(constants::window::width, constants::window::height, "jaledit");
 
     while (!WindowShouldClose()) {
         BeginDrawing();
+
         ClearBackground(RAYWHITE);
+        editor.render();
+
         EndDrawing();
     }
     CloseWindow();

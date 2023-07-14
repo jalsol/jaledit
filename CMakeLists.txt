@@ -34,12 +34,23 @@ include_directories(src)
 
 add_executable(${PROJECT_NAME}
     src/main.cpp
+    src/raygui_impl.cpp
+    src/utils.cpp
 
     src/keybind/node.cpp
     src/keybind/trie.cpp
 
-    src/buffer/node.cpp
+    src/rope/rope.cpp
+    src/rope/node.cpp
+    src/rope/node_leaf.cpp
+    src/rope/node_branch.cpp
+    src/rope/utils.cpp
+
+    src/buffer.cpp
+    src/editor.cpp
 )
+
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
 
 target_link_libraries(${PROJECT_NAME} raylib)
 

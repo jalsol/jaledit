@@ -62,8 +62,6 @@ Rope Rope::append(const Rope& other) const {
     return Rope{std::make_shared<Branch>(m_root, other.m_root)}.rebalance();
 }
 
-#include <iostream>
-
 Rope Rope::erase(std::size_t start, std::size_t length) const {
     auto lhs = m_root->split(start);
     auto rhs = lhs.second->split(length);
@@ -105,6 +103,12 @@ std::pair<Rope, Rope> Rope::split(std::size_t index) const {
     auto [left, right] = m_root->split(index);
     return {Rope{left}, Rope{right}};
 }
+
+std::size_t Rope::find_line_start(std::size_t index) const {
+    return m_root->find_line_start(index);
+}
+
+std::size_t Rope::line_count() const { return m_root->lfcnt() + 1; }
 
 Rope& Rope::operator=(const Rope& other) {
     m_root = other.m_root;

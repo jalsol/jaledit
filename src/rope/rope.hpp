@@ -41,6 +41,9 @@ public:
 
     std::pair<Rope, Rope> split(std::size_t index) const;
 
+    std::size_t find_line_start(std::size_t index) const;
+    std::size_t line_count() const;
+
     Rope& operator=(const Rope& other);
     bool operator==(const Rope& other) const;
     bool operator!=(const Rope& other) const;
