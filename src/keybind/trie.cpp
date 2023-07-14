@@ -13,8 +13,8 @@ Trie::~Trie() { recursive_delete(m_root); }
 void Trie::populate() {}
 
 void Trie::recursive_delete(Node* node) {
-    for (auto child : node->get_children()) {
-        if (child) {
+    for (auto* child : node->children()) {
+        if (child != nullptr) {
             recursive_delete(child);
         }
     }

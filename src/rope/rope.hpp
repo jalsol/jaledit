@@ -15,8 +15,8 @@ public:
 
     Rope();
     Rope(const std::string& text);
-    Rope(const Rope& other);
-    Rope(const Handle& root);
+    Rope(const Rope& other) = default;
+    Rope(Handle root);
 
     std::string to_string() const;
     std::size_t length() const;
@@ -44,7 +44,7 @@ public:
     std::size_t find_line_start(std::size_t index) const;
     std::size_t line_count() const;
 
-    Rope& operator=(const Rope& other);
+    Rope& operator=(const Rope& other) = default;
     bool operator==(const Rope& other) const;
     bool operator!=(const Rope& other) const;
     friend std::ostream& operator<<(std::ostream& os, const Rope& rope);
