@@ -14,4 +14,7 @@ public:
 private:
     std::vector<Buffer> m_buffers{};
     std::size_t m_buffer_id{};
+
+    Buffer& current_buffer();
+    const Buffer& current_buffer() const;
 };

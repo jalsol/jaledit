@@ -11,9 +11,8 @@ void Editor::render() {
     const int line_height = constants::font_size + 2;
     const std::size_t line_width = char_size.x;
 
-    const auto& buffer = m_buffers[m_buffer_id];
-    const auto& cursor = buffer.cursor();
-    const auto& content = buffer.rope();
+    const auto& cursor = current_buffer().cursor();
+    const auto& content = current_buffer().rope();
 
     const int max_line_number_size = utils::number_len(content.line_count());
     const int offset_from_number = 2;
@@ -80,3 +79,7 @@ void Editor::open(std::string_view filename) {
     m_buffers.emplace_back(filename);
     m_buffer_id = m_buffers.size() - 1;
 }
+
+Buffer& Editor::current_buffer() { return m_buffers[m_buffer_id]; }
+
+const Buffer& Editor::current_buffer() const { return m_buffers[m_buffer_id]; }
