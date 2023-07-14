@@ -7,18 +7,18 @@
 
 Branch::Branch(const Handle& left, const Handle& right)
     : m_left{left}, m_right{right} {
-    m_weight = m_left->length();
+    m_weight = m_left ? m_left->length() : 0;
     m_length = m_weight + (m_right ? m_right->length() : 0);
+
+    m_lfweight = m_left ? m_left->lfcnt() : 0;
+    m_lfcnt = m_lfweight + (m_right ? m_right->lfcnt() : 0);
 
     std::size_t left_depth = m_left ? m_left->depth() : 0;
     std::size_t right_depth = m_right ? m_right->depth() : 0;
     m_depth = std::max(left_depth, right_depth) + 1;
 }
 
-Branch::Branch(const Branch& other)
-    : m_left{other.m_left}, m_right{other.m_right} {
-    m_weight = m_left->length();
-}
+Branch::Branch(const Branch& other) : Branch{other.m_left, other.m_right} {}
 
 char Branch::operator[](std::size_t index) const {
     if (index < m_weight) {
@@ -88,4 +88,21 @@ std::vector<Node::Handle> Branch::leaves() const {
     }
 
     return result;
+}
+
+std::size_t Branch::find_line_start(std::size_t line_index) const {
+    if (line_index == 0) {
+        return 0;
+    }
+
+    if (line_index > m_lfcnt) {
+        return m_length;
+    }
+
+    if (line_index <= m_left->lfcnt()) {
+        return m_left->find_line_start(line_index);
+    } else {
+        return m_weight
+             + m_right->find_line_start(line_index - m_left->lfcnt());
+    }
 }
