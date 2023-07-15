@@ -108,6 +108,15 @@ std::size_t Rope::find_line_start(std::size_t index) const {
 
 std::size_t Rope::line_count() const { return m_root->lfcnt() + 1; }
 
+std::size_t Rope::line_length(std::size_t line_index) const {
+    if (line_index == line_count() - 1) {
+        return length() - m_root->find_line_start(line_index);
+    }
+
+    return m_root->find_line_start(line_index + 1)
+         - m_root->find_line_start(line_index) - 1;
+}
+
 bool Rope::operator==(const Rope& other) const {
     return m_root->to_string() == other.m_root->to_string();
 }

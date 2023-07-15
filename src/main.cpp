@@ -7,11 +7,7 @@ int main(int argc, char** argv) {
     SetExitKey(KEY_NULL);
     SetTargetFPS(144);
 
-    Editor editor;
-
-    if (argc > 1) {
-        editor.open(argv[1]);
-    }
+    Editor editor = argc > 1 ? Editor(argv[1]) : Editor();
 
     InitWindow(constants::window::width, constants::window::height, "jaledit");
 
@@ -22,6 +18,8 @@ int main(int argc, char** argv) {
         editor.render();
 
         EndDrawing();
+
+        editor.update();
     }
     CloseWindow();
 }

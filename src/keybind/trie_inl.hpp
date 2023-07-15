@@ -6,24 +6,24 @@
 
 #include "utils.hpp"
 
+#include <ranges>
+
 namespace keybind {
 
-template<typename Func, typename... Args>
-void Trie::insert(std::string_view keyseq, Func func, Args... args) {
+template<std::invocable Func>
+void Trie::insert(std::string_view keyseq, Func func) {
     auto* current = m_root;
 
-    for (char c : keyseq) {
-        if (!current->m_children[c]) {
-            current->m_children[c] = new Node;
+    for (char c : keyseq | std::views::take(keyseq.size() - 1)) {
+        if (!current->child(c)) {
+            current->child(c) = new Node;
         }
 
-        current = current->m_children[c];
+        current->child(c)->parent() = current;
+        current = current->child(c);
     }
 
-    Node* new_node
-        = new FuncNode<Func, Args...>(std::move(*current), func, args...);
-    current->parent()->m_children[keyseq.back()] = new_node;
-    delete current;
+    current->child(keyseq.back()) = new FuncNode<Func>(func);
 }
 
 } // namespace keybind

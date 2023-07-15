@@ -12,28 +12,31 @@ namespace keybind {
 class Node {
 public:
     void set_parent(Node* parent);
-    Node* parent() const;
+    Node*& parent();
 
     std::array<Node*, constants::char_limit>& children();
     const std::array<Node*, constants::char_limit>& children() const;
+    Node*& child(char c);
+    virtual void call(){};
+
+    virtual bool is_func() { return false; };
+    virtual ~Node();
 
 protected:
     Node* m_parent{};
     std::array<Node*, constants::char_limit> m_children{};
 };
 
-template<std::invocable Func, typename... Args>
+template<std::invocable Func>
 class FuncNode : public Node {
 public:
-    FuncNode(Node&& old_node, Func func, Args... args);
-    void call();
+    FuncNode(Func func);
+    void call() override;
+
+    bool is_func() override { return true; }
 
 private:
     Func m_func;
-    std::tuple<Args...> m_args;
-
-    using Node::m_children;
-    using Node::m_parent;
 };
 
 } // namespace keybind
