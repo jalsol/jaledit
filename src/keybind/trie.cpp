@@ -6,20 +6,24 @@
 
 namespace keybind {
 
-Trie::Trie() { populate(); }
+Trie::Trie() : m_current{m_root} {}
 
-Trie::~Trie() { recursive_delete(m_root); }
+Trie::~Trie() { delete m_root; }
 
-void Trie::populate() {}
-
-void Trie::recursive_delete(Node* node) {
-    for (auto* child : node->children()) {
-        if (child != nullptr) {
-            recursive_delete(child);
-        }
+void Trie::step(char c) {
+    if (!m_current || !m_current->child(c)) {
+        reset_step();
+        return;
     }
 
-    delete node;
+    m_current = m_current->child(c);
+
+    if (m_current->is_func()) {
+        m_current->call();
+        reset_step();
+    }
 }
+
+void Trie::reset_step() { m_current = m_root; }
 
 } // namespace keybind

@@ -43,6 +43,7 @@ public:
 
     std::size_t find_line_start(std::size_t index) const;
     std::size_t line_count() const;
+    std::size_t line_length(std::size_t line_index) const;
 
     Rope& operator=(const Rope& other) = default;
     bool operator==(const Rope& other) const;

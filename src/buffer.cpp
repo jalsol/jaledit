@@ -1,10 +1,51 @@
 #include "buffer.hpp"
 
+#include "constants.hpp"
+#include "raylib.h"
+#include "utils.hpp"
+
+#include <cassert>
 #include <fstream>
 #include <sstream>
 #include <string_view>
 
-Buffer::Buffer() : m_rope{"\n"} {}
+int View::lines(Vector2 char_size) {
+    return static_cast<int>(GetScreenHeight() - constants::margin)
+         / (char_size.y + constants::line_spacing);
+}
+
+int View::columns(Vector2 char_size) const {
+    return static_cast<int>(GetScreenWidth() - constants::margin - 1)
+             / char_size.x
+         - m_header_size - 1;
+}
+
+int View::offset_line() const { return m_offset_line; }
+
+int View::offset_column() const { return m_offset_column; }
+
+void View::update_offset_line(int line) { m_offset_line = line; }
+
+void View::update_offset_column(int column) { m_offset_column = column; }
+
+void View::update_header_size(int size) { m_header_size = size; }
+
+bool View::viewable(int line, int column, Vector2 char_size) const {
+    return viewable_line(line, char_size) && viewable_column(column, char_size);
+}
+
+bool View::viewable_line(int line, Vector2 char_size) const {
+    return line >= m_offset_line && line < m_offset_line + lines(char_size);
+}
+
+bool View::viewable_column(int column, Vector2 char_size) const {
+    return column >= m_offset_column
+        && column < m_offset_column + columns(char_size);
+}
+
+Buffer::Buffer() : m_rope{"\n"} {
+    m_view.update_header_size(utils::number_len(m_rope.line_count()) + 2);
+}
 
 Buffer::Buffer(std::string_view filename) : m_filename{filename} {
     std::ifstream file{filename.data()};
@@ -15,9 +56,15 @@ Buffer::Buffer(std::string_view filename) : m_filename{filename} {
     std::stringstream buffer;
     buffer << file.rdbuf();
     m_rope = Rope{buffer.str()};
-    m_cursor.character = m_rope[0];
+    m_view.update_header_size(utils::number_len(m_rope.line_count()) + 2);
 }
+
+Cursor& Buffer::cursor() { return m_cursor; }
 
 const Cursor& Buffer::cursor() const { return m_cursor; }
 
 const Rope& Buffer::rope() const { return m_rope; }
+
+View& Buffer::view() { return m_view; }
+
+const View& Buffer::view() const { return m_view; }

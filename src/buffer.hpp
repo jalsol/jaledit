@@ -2,15 +2,37 @@
 
 #include "rope/rope.hpp"
 
+#include "raylib.h"
+
 #include <cstddef>
 #include <stack>
 #include <string>
 #include <string_view>
 
 struct Cursor {
-    std::size_t line{};
-    std::size_t column{};
-    char character{};
+    int line{};
+    int column{};
+};
+
+class View {
+public:
+    static int lines(Vector2 char_size);
+    int columns(Vector2 char_size) const;
+
+    int offset_line() const;
+    int offset_column() const;
+    void update_offset_line(int line);
+    void update_offset_column(int column);
+    void update_header_size(int size);
+
+    bool viewable(int line, int column, Vector2 char_size) const;
+    bool viewable_line(int line, Vector2 char_size) const;
+    bool viewable_column(int column, Vector2 char_size) const;
+
+private:
+    int m_offset_line{};
+    int m_offset_column{};
+    int m_header_size{};
 };
 
 class Buffer {
@@ -18,8 +40,11 @@ public:
     Buffer();
     Buffer(std::string_view filename);
 
+    Cursor& cursor();
     const Cursor& cursor() const;
     const Rope& rope() const;
+    View& view();
+    const View& view() const;
 
 private:
     static constexpr std::size_t max_gap_size = 1024;
@@ -33,6 +58,7 @@ private:
     std::size_t m_gap_end{};
 
     Cursor m_cursor{};
+    View m_view{};
 
     std::string_view m_filename{};
 };

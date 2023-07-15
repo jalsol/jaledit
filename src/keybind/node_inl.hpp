@@ -3,26 +3,24 @@
 #include "keybind/node.hpp"
 
 #include <concepts>
+#include <functional>
+#include <iostream>
 #include <memory>
 
 namespace keybind {
 
-template<std::invocable Func, typename... Args>
-FuncNode<Func, Args...>::FuncNode(Node&& old_node, Func func, Args... args)
-    : m_func{func}, m_args{args...} {
-    m_parent = old_node.parent();
-    m_children = std::move(old_node.children());
-
+template<std::invocable Func>
+FuncNode<Func>::FuncNode(Func func) : m_func{func} {
     for (auto* child : m_children) {
         if (child != nullptr) {
-            child->m_parent = this;
+            child->parent() = this;
         }
     }
 }
 
-template<std::invocable Func, typename... Args>
-void FuncNode<Func, Args...>::call() {
-    std::apply(m_func, m_args);
+template<std::invocable Func>
+void FuncNode<Func>::call() {
+    std::invoke(m_func);
 }
 
 } // namespace keybind
