@@ -18,4 +18,4 @@ constexpr std::array<std::size_t, Rope::max_depth> fibs = make_fibs();
 
 std::size_t fib(std::size_t n) { return fibs[n]; }
 
-std::array<std::size_t, Rope::max_depth> fib_list() { return fibs; }
+consteval std::array<std::size_t, Rope::max_depth> fib_list() { return fibs; }
