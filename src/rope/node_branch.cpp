@@ -37,7 +37,7 @@ std::string Branch::substr(std::size_t start, std::size_t length) const {
 
     if (start + length > m_weight) {
         std::size_t offset = m_weight - start;
-        result += m_right ? m_right->substr(m_weight, length - offset) : "";
+        result += m_right ? m_right->substr(0, length - offset) : "";
     }
 
     return result;
@@ -95,7 +95,9 @@ std::size_t Branch::find_line_start(std::size_t line_index) const {
         return 0;
     }
 
-    if (line_index > m_lfcnt) {
+    --line_index;
+
+    if (line_index >= m_lfcnt) {
         return m_length + 1;
     }
 
