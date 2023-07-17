@@ -11,12 +11,11 @@ Leaf::Leaf(const std::string& text) : m_text{text} {
 
     for (std::size_t i = 0; i < m_length; ++i) {
         if (m_text[i] == '\n') {
-            ++m_lfcnt;
             m_lfpos.push_back(i);
         }
     }
 
-    m_lfweight = m_lfcnt;
+    m_lfweight = m_lfcnt = m_lfpos.size();
 }
 
 char Leaf::operator[](std::size_t index) const { return m_text[index]; }
