@@ -4,7 +4,8 @@
 #include "raylib.h"
 #include "utils.hpp"
 
-#include <cassert>
+#include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <sstream>
 #include <string_view>
@@ -68,3 +69,107 @@ const Rope& Buffer::rope() const { return m_rope; }
 View& Buffer::view() { return m_view; }
 
 const View& Buffer::view() const { return m_view; }
+
+void Buffer::cursor_move_line(int delta) {
+    const Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
+
+    m_cursor.line = std::clamp(m_cursor.line + delta, 0,
+                               static_cast<int>(m_rope.line_count()) - 1);
+
+    cursor_move_column(0);
+
+    if (!m_view.viewable_line(m_cursor.line, char_size)) {
+        if (delta < 0) {
+            m_view.update_offset_line(m_cursor.line);
+        } else if (delta > 0) {
+            m_view.update_offset_line(m_cursor.line - m_view.lines(char_size)
+                                      + 1);
+        }
+    }
+}
+
+void Buffer::cursor_move_column(int delta) {
+    const Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
+    int line_length = m_rope.line_length(m_cursor.line);
+
+    m_cursor.column = std::clamp(m_cursor.column + delta, 0, line_length - 1);
+    if (m_cursor.column < 0) {
+        m_cursor.column = 0;
+    }
+
+    if (!m_view.viewable_column(m_cursor.column, char_size)) {
+        if (delta < 0) {
+            m_view.update_offset_column(m_cursor.column);
+        } else if (delta > 0) {
+            m_view.update_offset_column(m_cursor.column
+                                        - m_view.columns(char_size) + 1);
+        }
+    }
+}
+
+void Buffer::cursor_move_next_char() {
+    if (m_cursor.column
+        == static_cast<int>(m_rope.line_length(m_cursor.line))) {
+        ++m_cursor.line;
+        m_cursor.column = 0;
+    } else {
+        ++m_cursor.column;
+    }
+}
+
+void Buffer::cursor_move_prev_char() {
+    if (m_cursor.column == 0) {
+        --m_cursor.line;
+        m_cursor.column = m_rope.line_length(m_cursor.line);
+    } else {
+        --m_cursor.column;
+    }
+}
+
+void Buffer::cursor_move_next_word() {
+    std::size_t index = m_rope.find_line_start(m_cursor.line) + m_cursor.column;
+    char c = m_rope[index];
+    bool alnum_word = !!std::isalnum(c);
+    bool punct_word = !!std::ispunct(c);
+
+    // if already in word, move to end of word
+    if (alnum_word) {
+        while (std::isalnum(m_rope[index])) {
+            cursor_move_next_char();
+            ++index;
+        }
+    } else if (punct_word) {
+        cursor_move_next_char();
+        ++index;
+        if (std::ispunct(m_rope[index])) {
+            return;
+        }
+    }
+
+    if (std::isspace(m_rope[index])) {
+        while (std::isspace(m_rope[index])) {
+            cursor_move_next_char();
+            ++index;
+        }
+    }
+}
+
+void Buffer::cursor_move_prev_word() {
+    cursor_move_prev_char();
+    std::size_t index = m_rope.find_line_start(m_cursor.line) + m_cursor.column;
+
+    while (std::isspace(m_rope[index])) {
+        cursor_move_prev_char();
+        --index;
+    }
+
+    if (std::ispunct(m_rope[index])) {
+        return;
+    }
+
+    // if already in word, move to beginning of word
+    while (std::isalnum(m_rope[index - 1])) {
+        cursor_move_prev_char();
+        --index;
+    }
+}

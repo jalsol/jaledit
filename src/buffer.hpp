@@ -46,6 +46,13 @@ public:
     View& view();
     const View& view() const;
 
+    void cursor_move_line(int delta);
+    void cursor_move_column(int delta);
+    void cursor_move_next_char();
+    void cursor_move_prev_char();
+    void cursor_move_next_word();
+    void cursor_move_prev_word();
+
 private:
     static constexpr std::size_t max_gap_size = 1024;
 

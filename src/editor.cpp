@@ -12,18 +12,25 @@
 constexpr int max_line_length = INT_MAX / 4 * 3;
 
 Editor::Editor() {
-    m_keybinds.insert("h", [this] { cursor_move_column(-1); });
-    m_keybinds.insert("j", [this] { cursor_move_line(1); });
-    m_keybinds.insert("k", [this] { cursor_move_line(-1); });
-    m_keybinds.insert("l", [this] { cursor_move_column(1); });
+    m_keybinds.insert("h", [this] { current_buffer().cursor_move_column(-1); });
+    m_keybinds.insert("j", [this] { current_buffer().cursor_move_line(1); });
+    m_keybinds.insert("k", [this] { current_buffer().cursor_move_line(-1); });
+    m_keybinds.insert("l", [this] { current_buffer().cursor_move_column(1); });
     m_keybinds.insert("gg", [this] {
-        cursor_move_line(-current_buffer().rope().line_count());
+        current_buffer().cursor_move_line(
+            -current_buffer().rope().line_count());
     });
     m_keybinds.insert("G", [this] {
-        cursor_move_line(current_buffer().rope().line_count());
+        current_buffer().cursor_move_line(current_buffer().rope().line_count());
     });
-    m_keybinds.insert("0", [this] { cursor_move_column(-max_line_length); });
-    m_keybinds.insert("$", [this] { cursor_move_column(max_line_length); });
+    m_keybinds.insert(
+        "0", [this] { current_buffer().cursor_move_column(-max_line_length); });
+    m_keybinds.insert(
+        "$", [this] { current_buffer().cursor_move_column(max_line_length); });
+    m_keybinds.insert("w",
+                      [this] { current_buffer().cursor_move_next_word(); });
+    m_keybinds.insert("b",
+                      [this] { current_buffer().cursor_move_prev_word(); });
 }
 
 Editor::Editor(std::string_view filename) : Editor{} { open(filename); }
@@ -114,48 +121,4 @@ void Editor::normal_mode() {
     }
 
     m_keybinds.step(c);
-}
-
-void Editor::cursor_move_line(int delta) {
-    auto& cursor = current_buffer().cursor();
-    const auto& content = current_buffer().rope();
-    auto& view = current_buffer().view();
-
-    const Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
-
-    cursor.line = std::clamp(cursor.line + delta, 0,
-                             static_cast<int>(content.line_count()) - 1);
-
-    cursor_move_column(0);
-
-    if (!view.viewable_line(cursor.line, char_size)) {
-        if (delta < 0) {
-            view.update_offset_line(cursor.line);
-        } else if (delta > 0) {
-            view.update_offset_line(cursor.line - view.lines(char_size) + 1);
-        }
-    }
-}
-
-void Editor::cursor_move_column(int delta) {
-    auto& cursor = current_buffer().cursor();
-    const auto& content = current_buffer().rope();
-    auto& view = current_buffer().view();
-
-    const Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
-    int line_length = content.line_length(cursor.line);
-
-    cursor.column = std::clamp(cursor.column + delta, 0, line_length - 1);
-    if (cursor.column < 0) {
-        cursor.column = 0;
-    }
-
-    if (!view.viewable_column(cursor.column, char_size)) {
-        if (delta < 0) {
-            view.update_offset_column(cursor.column);
-        } else if (delta > 0) {
-            view.update_offset_column(cursor.column - view.columns(char_size)
-                                      + 1);
-        }
-    }
 }

@@ -32,7 +32,4 @@ private:
     const Buffer& current_buffer() const;
 
     void normal_mode();
-
-    void cursor_move_line(int delta);
-    void cursor_move_column(int delta);
 };

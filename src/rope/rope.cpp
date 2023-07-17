@@ -13,7 +13,13 @@ std::string Rope::to_string() const { return m_root->to_string(); }
 std::size_t Rope::length() const { return m_root->length(); }
 
 char Rope::operator[](std::size_t index) const {
-    return m_root->operator[](index);
+    if (index == length()) {
+        return '\0';
+    } else if (index > length()) {
+        throw std::out_of_range{"Index out of range"};
+    } else {
+        return m_root->operator[](index);
+    }
 }
 
 std::string Rope::substr(std::size_t start, std::size_t length) const {
