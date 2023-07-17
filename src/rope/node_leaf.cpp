@@ -44,7 +44,7 @@ std::size_t Leaf::find_line_start(std::size_t line_index) const {
     }
 
     if (line_index > m_lfcnt) {
-        return m_length;
+        return m_length + 1;
     }
 
     return m_lfpos[line_index - 1] + 1;

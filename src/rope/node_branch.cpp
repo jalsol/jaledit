@@ -96,7 +96,7 @@ std::size_t Branch::find_line_start(std::size_t line_index) const {
     }
 
     if (line_index > m_lfcnt) {
-        return m_length;
+        return m_length + 1;
     }
 
     if (line_index <= m_left->lfcnt()) {
