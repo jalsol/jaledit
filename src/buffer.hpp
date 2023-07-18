@@ -54,6 +54,7 @@ public:
     void cursor_move_prev_word();
 
     void insert_at_cursor(const std::string& text);
+    void append_at_cursor(const std::string& text);
     void erase_at_cursor();
     void undo();
     void redo();

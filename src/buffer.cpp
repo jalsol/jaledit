@@ -185,6 +185,17 @@ void Buffer::insert_at_cursor(const std::string& text) {
     }
 }
 
+void Buffer::append_at_cursor(const std::string& text) {
+    std::size_t pos = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
+    m_undo.push_back(m_rope);
+    m_redo.clear();
+    m_rope = m_rope.insert(pos + 1, text);
+
+    for (auto _ = text.size(); _ > 0; --_) {
+        cursor_move_next_char();
+    }
+}
+
 void Buffer::erase_at_cursor() {
     std::size_t pos = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
     if (pos == 0) {
