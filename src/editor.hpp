@@ -31,5 +31,7 @@ private:
     Buffer& current_buffer();
     const Buffer& current_buffer() const;
 
-    void normal_mode();
+    void set_mode(EditorMode mode);
+    void normal_mode(char c);
+    void insert_mode(char c);
 };

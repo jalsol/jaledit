@@ -90,21 +90,10 @@ std::vector<Node::Handle> Branch::leaves() const {
     return result;
 }
 
-std::size_t Branch::find_line_start(std::size_t line_index) const {
-    if (line_index == 0) {
-        return 0;
-    }
-
-    --line_index;
-
-    if (line_index >= m_lfcnt) {
-        return m_length + 1;
-    }
-
-    if (line_index <= m_left->lfcnt()) {
-        return m_left->find_line_start(line_index);
+std::size_t Branch::find_line_feed(std::size_t index) const {
+    if (index < m_left->lfcnt()) {
+        return m_left->find_line_feed(index);
     } else {
-        return m_weight
-             + m_right->find_line_start(line_index - m_left->lfcnt());
+        return m_weight + m_right->find_line_feed(index - m_left->lfcnt());
     }
 }

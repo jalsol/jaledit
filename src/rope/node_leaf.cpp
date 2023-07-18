@@ -37,14 +37,6 @@ std::vector<Node::Handle> Leaf::leaves() const {
     return {std::make_shared<Leaf>(*this)};
 }
 
-std::size_t Leaf::find_line_start(std::size_t line_index) const {
-    if (line_index == 0) {
-        return 0;
-    }
-
-    if (line_index > m_lfcnt) {
-        return m_length + 1;
-    }
-
-    return m_lfpos[line_index - 1] + 1;
+std::size_t Leaf::find_line_feed(std::size_t index) const {
+    return m_lfpos.at(index);
 }

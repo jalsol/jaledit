@@ -44,7 +44,7 @@ bool View::viewable_column(int column, Vector2 char_size) const {
         && column < m_offset_column + columns(char_size);
 }
 
-Buffer::Buffer() : m_rope{"\n"} {
+Buffer::Buffer() : m_rope{""} {
     m_view.update_header_size(utils::number_len(m_rope.line_count()) + 2);
 }
 
@@ -127,7 +127,7 @@ void Buffer::cursor_move_prev_char() {
 }
 
 void Buffer::cursor_move_next_word() {
-    std::size_t index = m_rope.find_line_start(m_cursor.line) + m_cursor.column;
+    std::size_t index = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
     char c = m_rope[index];
     bool alnum_word = !!std::isalnum(c);
     bool punct_word = !!std::ispunct(c);
@@ -156,7 +156,7 @@ void Buffer::cursor_move_next_word() {
 
 void Buffer::cursor_move_prev_word() {
     cursor_move_prev_char();
-    std::size_t index = m_rope.find_line_start(m_cursor.line) + m_cursor.column;
+    std::size_t index = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
 
     while (std::isspace(m_rope[index])) {
         cursor_move_prev_char();
@@ -172,4 +172,22 @@ void Buffer::cursor_move_prev_word() {
         cursor_move_prev_char();
         --index;
     }
+}
+
+void Buffer::insert_at_cursor(const std::string& text) {
+    std::size_t pos = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
+    m_undo.push(m_rope);
+    m_rope = m_rope.insert(pos, text);
+    cursor_move_next_char();
+}
+
+void Buffer::erase_at_cursor() {
+    std::size_t pos = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
+    if (pos == 0) {
+        return;
+    }
+
+    m_undo.push(m_rope);
+    cursor_move_prev_char();
+    m_rope = m_rope.erase(pos - 1, 1);
 }

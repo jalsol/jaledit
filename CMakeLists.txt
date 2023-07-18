@@ -50,6 +50,16 @@ add_executable(${PROJECT_NAME}
     src/editor.cpp
 )
 
+add_executable(test_rope
+    src/rope/test.cpp
+
+    src/rope/rope.cpp
+    src/rope/node.cpp
+    src/rope/node_leaf.cpp
+    src/rope/node_branch.cpp
+    src/rope/utils.cpp
+)
+
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
 
 target_link_libraries(${PROJECT_NAME} raylib)
