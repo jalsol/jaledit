@@ -2,13 +2,20 @@
 
 #include "constants.hpp"
 #include "raylib.h"
+#include "rope/utils.hpp"
 #include "utils.hpp"
 
 #include <algorithm>
 #include <cctype>
 #include <fstream>
-#include <sstream>
 #include <string_view>
+#include <vector>
+
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 int View::lines(Vector2 char_size) {
     return static_cast<int>(GetScreenHeight() - constants::margin)
@@ -54,9 +61,29 @@ Buffer::Buffer(std::string_view filename) : m_filename{filename} {
         throw std::runtime_error{"Could not open file"};
     }
 
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    m_rope = Rope{buffer.str()};
+    int fd = open(filename.data(), O_RDONLY, S_IRUSR | S_IWUSR);
+    struct stat sb;
+
+    if (fstat(fd, &sb) == -1) {
+        throw std::runtime_error{"Could not get file size"};
+    }
+
+    char* file_in_memory = static_cast<char*>(
+        mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
+    std::size_t remaining = sb.st_size;
+    char* buf_ptr = file_in_memory;
+
+    for (auto i = Rope::max_depth - 2; i > 0; --i) {
+        while (remaining >= fib(i)) {
+            m_rope = m_rope.append(std::string(buf_ptr, fib(i)));
+            buf_ptr += fib(i);
+            remaining -= fib(i);
+        }
+    }
+
+    munmap(file_in_memory, sb.st_size);
+    close(fd);
+
     m_view.update_header_size(utils::number_len(m_rope.line_count()) + 2);
 }
 
