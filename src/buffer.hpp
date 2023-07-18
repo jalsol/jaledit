@@ -5,9 +5,9 @@
 #include "raylib.h"
 
 #include <cstddef>
-#include <stack>
 #include <string>
 #include <string_view>
+#include <vector>
 
 struct Cursor {
     int line{};
@@ -55,6 +55,8 @@ public:
 
     void insert_at_cursor(const std::string& text);
     void erase_at_cursor();
+    void undo();
+    void redo();
 
 private:
     // The value of 32 is small enough for demo purposes,
@@ -62,8 +64,8 @@ private:
     static constexpr std::size_t max_gap_size = 32;
 
     Rope m_rope{};
-    std::stack<Rope> m_undo{};
-    std::stack<Rope> m_redo{};
+    std::vector<Rope> m_undo{};
+    std::vector<Rope> m_redo{};
 
     std::string m_gap{};
     std::size_t m_gap_start{};

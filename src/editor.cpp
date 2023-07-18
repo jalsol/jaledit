@@ -6,6 +6,7 @@
 #include "utils.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <climits>
 #include <string_view>
 
@@ -33,6 +34,8 @@ Editor::Editor() {
                       [this] { current_buffer().cursor_move_prev_word(); });
 
     m_keybinds.insert("i", [this] { set_mode(EditorMode::Insert); });
+    m_keybinds.insert("u", [this] { current_buffer().undo(); });
+    m_keybinds.insert("r", [this] { current_buffer().redo(); });
 }
 
 Editor::Editor(std::string_view filename) : Editor{} { open(filename); }
@@ -104,15 +107,79 @@ void Editor::render() {
     }
 }
 
+int shift(int key) {
+    if (std::isalpha(key)) {
+        return std::toupper(key);
+    }
+
+    constexpr std::array<std::pair<int, int>, 21> map = {{
+        {',', '<'}, {'.', '>'}, {'/', '?'},  {';', ':'}, {'\'', '"'},
+        {'[', '{'}, {']', '}'}, {'\\', '|'}, {'`', '~'}, {'-', '_'},
+        {'=', '+'}, {'1', '!'}, {'2', '@'},  {'3', '#'}, {'4', '$'},
+        {'5', '%'}, {'6', '^'}, {'7', '&'},  {'8', '*'}, {'9', '('},
+        {'0', ')'},
+    }};
+
+    for (const auto& [from, to] : map) {
+        if (from == key) {
+            return to;
+        }
+    }
+
+    return key;
+}
+
+Key modify_key(int key, int prev_key) {
+    switch (key) {
+    case KEY_ENTER:
+        key = '\n';
+        break;
+    }
+
+    switch (prev_key) {
+    case KEY_LEFT_SHIFT:
+    case KEY_RIGHT_SHIFT:
+        return {KEY_NULL, shift(key)};
+
+    case KEY_LEFT_CONTROL:
+    case KEY_RIGHT_CONTROL:
+        return {KEY_LEFT_CONTROL, key};
+
+    case KEY_LEFT_ALT:
+    case KEY_RIGHT_ALT:
+        return {KEY_LEFT_ALT, key};
+
+    default:
+        return {KEY_NULL, std::tolower(key)};
+    }
+}
+
 void Editor::update() {
-    char c = GetCharPressed();
+    static int prev_key = KEY_NULL;
+    Key rv;
+    int key = GetKeyPressed();
+
+    if (key == KEY_NULL) {
+        return;
+    }
+
+    if ((KEY_APOSTROPHE <= key && key <= KEY_GRAVE) || key == KEY_ENTER) {
+        rv = modify_key(key, prev_key);
+        prev_key = KEY_NULL;
+    } else if (KEY_LEFT_SHIFT <= key && key <= KEY_RIGHT_SUPER) {
+        prev_key = key;
+        return;
+    } else {
+        rv = {KEY_NULL, key};
+        prev_key = KEY_NULL;
+    }
 
     switch (m_mode) {
     case EditorMode::Normal:
-        normal_mode(c);
+        normal_mode(rv);
         break;
     case EditorMode::Insert:
-        insert_mode(c);
+        insert_mode(rv);
         break;
     default:
         break;
@@ -135,35 +202,33 @@ const Buffer& Editor::current_buffer() const { return m_buffers[m_buffer_id]; }
 
 void Editor::set_mode(EditorMode mode) { m_mode = mode; }
 
-void Editor::normal_mode(char c) {
-    if (c == '\0') {
-        return;
+void Editor::normal_mode(Key key) {
+    if (key.modifier != KEY_NULL) {
+        m_keybinds.reset_step();
+    } else {
+        m_keybinds.step(key.key);
     }
-
-    m_keybinds.step(c);
 }
 
-void Editor::insert_mode(char c) {
-    if (IsKeyPressed(KEY_ESCAPE)) {
+void Editor::insert_mode(Key key) {
+    if (key.key == KEY_ESCAPE) {
         set_mode(EditorMode::Normal);
         return;
     }
 
-    if (IsKeyPressed(KEY_ENTER)) {
-        current_buffer().insert_at_cursor("\n");
-        return;
-    }
-
-    if (IsKeyPressed(KEY_BACKSPACE)) {
+    if (key.key == KEY_BACKSPACE) {
         current_buffer().erase_at_cursor();
         return;
     }
 
-    if (c == '\0') {
+    if (key.key == KEY_TAB) {
+        current_buffer().insert_at_cursor(std::string(4, ' '));
         return;
     }
 
-    current_buffer().insert_at_cursor(std::string{c});
-
-    std::cerr << current_buffer().rope() << '\n';
+    current_buffer().insert_at_cursor(std::string{char(key.key)});
 }
+
+void Editor::undo() { current_buffer().undo(); }
+
+void Editor::redo() { current_buffer().redo(); }

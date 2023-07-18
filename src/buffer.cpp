@@ -176,9 +176,13 @@ void Buffer::cursor_move_prev_word() {
 
 void Buffer::insert_at_cursor(const std::string& text) {
     std::size_t pos = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
-    m_undo.push(m_rope);
+    m_undo.push_back(m_rope);
+    m_redo.clear();
     m_rope = m_rope.insert(pos, text);
-    cursor_move_next_char();
+
+    for (auto _ = text.size(); _ > 0; --_) {
+        cursor_move_next_char();
+    }
 }
 
 void Buffer::erase_at_cursor() {
@@ -187,7 +191,28 @@ void Buffer::erase_at_cursor() {
         return;
     }
 
-    m_undo.push(m_rope);
+    m_undo.push_back(m_rope);
+    m_redo.clear();
     cursor_move_prev_char();
     m_rope = m_rope.erase(pos - 1, 1);
+}
+
+void Buffer::undo() {
+    if (m_undo.empty()) {
+        return;
+    }
+
+    m_redo.push_back(m_rope);
+    m_rope = m_undo.back();
+    m_undo.pop_back();
+}
+
+void Buffer::redo() {
+    if (m_redo.empty()) {
+        return;
+    }
+
+    m_undo.push_back(m_rope);
+    m_rope = m_redo.back();
+    m_redo.pop_back();
 }
