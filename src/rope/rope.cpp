@@ -116,7 +116,6 @@ std::pair<Rope, Rope> Rope::split(std::size_t index) const {
     return {Rope{left}, Rope{right}};
 }
 
-#include <iostream>
 std::size_t Rope::find_line_start(std::size_t index) const {
     if (index == 0) {
         return 0;

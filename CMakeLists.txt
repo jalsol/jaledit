@@ -7,11 +7,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_BUILD_TYPE Debug)
 
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 # Dependencies
 ###############################################################################
 
 ## raylib
-set(RAYLIB_VERSION 4.2.1)
+set(RAYLIB_VERSION 4.2.2)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
 if (NOT raylib_FOUND) # If there's none, fetch and build raylib
     include(FetchContent)

@@ -106,23 +106,24 @@ void Editor::render() {
     for (; cur_line_idx < content.line_count(); ++cur_line_idx) {
         std::size_t next_line_start = content.find_line_start(cur_line_idx + 1);
 
-        if (view.viewable_line(cur_line_idx, char_size)) {
-            y += line_height;
-
-            std::size_t render_line_start = line_start + view.offset_column();
-            std::size_t render_line_len = std::min(
-                next_line_start - line_start - 1,
-                static_cast<std::size_t>(view.columns(char_size) - 1));
-
-            std::string line
-                = content.substr(render_line_start, render_line_len);
-
-            const char* line_text = TextFormat("%-*d%s", header_width + 1,
-                                               cur_line_idx + 1, line.c_str());
-
-            utils::draw_text(line_text, {constants::margin, y}, BLACK,
-                             constants::font_size, 0);
+        if (!view.viewable_line(cur_line_idx, char_size)) {
+            break;
         }
+
+        y += line_height;
+
+        std::size_t render_line_start = line_start + view.offset_column();
+        std::size_t render_line_len
+            = std::min(next_line_start - line_start - 1,
+                       static_cast<std::size_t>(view.columns(char_size) - 1));
+
+        std::string line = content.substr(render_line_start, render_line_len);
+
+        const char* line_text = TextFormat("%-*d%s", header_width + 1,
+                                           cur_line_idx + 1, line.c_str());
+
+        utils::draw_text(line_text, {constants::margin, y}, BLACK,
+                         constants::font_size, 0);
 
         line_start = next_line_start;
     }
