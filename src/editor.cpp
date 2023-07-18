@@ -235,6 +235,16 @@ void Editor::normal_mode(Key key) {
 
 void Editor::insert_mode(Key key) {
     if (key.key == KEY_ESCAPE) {
+        const auto& cursor = current_buffer().cursor();
+        const auto& rope = current_buffer().rope();
+
+        if (cursor.column > 0) {
+            std::size_t index = rope.index_from_pos(cursor.line, cursor.column);
+            if (rope[index] == '\n' || rope[index] == '\0') {
+                current_buffer().cursor_move_column(-1);
+            }
+        }
+
         set_mode(EditorMode::Normal);
         return;
     }
