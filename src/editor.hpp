@@ -13,6 +13,11 @@ enum class EditorMode {
     Command,
 };
 
+struct Key {
+    int modifier{};
+    int key{};
+};
+
 class Editor {
 public:
     Editor();
@@ -32,6 +37,8 @@ private:
     const Buffer& current_buffer() const;
 
     void set_mode(EditorMode mode);
-    void normal_mode(char c);
-    void insert_mode(char c);
+    void normal_mode(Key key);
+    void insert_mode(Key key);
+    void undo();
+    void redo();
 };
