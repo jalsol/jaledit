@@ -34,6 +34,27 @@ Editor::Editor() {
                       [this] { current_buffer().cursor_move_prev_word(); });
 
     m_keybinds.insert("i", [this] { set_mode(EditorMode::Insert); });
+    m_keybinds.insert("o", [this] {
+        current_buffer().cursor_move_column(constants::max_line_length);
+        current_buffer().append_at_cursor("\n");
+        current_buffer().cursor_move_line(1);
+        set_mode(EditorMode::Insert);
+    });
+    m_keybinds.insert("O", [this] {
+        current_buffer().cursor_move_column(-constants::max_line_length);
+        current_buffer().insert_at_cursor("\n");
+        current_buffer().cursor_move_line(-1);
+        set_mode(EditorMode::Insert);
+    });
+    m_keybinds.insert("a", [this] {
+        current_buffer().cursor_move_next_char();
+        set_mode(EditorMode::Insert);
+    });
+    m_keybinds.insert("A", [this] {
+        current_buffer().cursor_move_column(constants::max_line_length);
+        current_buffer().cursor_move_next_char();
+        set_mode(EditorMode::Insert);
+    });
     m_keybinds.insert("u", [this] { current_buffer().undo(); });
     m_keybinds.insert("r", [this] { current_buffer().redo(); });
 }
