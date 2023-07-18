@@ -9,8 +9,6 @@
 #include <climits>
 #include <string_view>
 
-constexpr int max_line_length = INT_MAX / 4 * 3;
-
 Editor::Editor() {
     m_keybinds.insert("h", [this] { current_buffer().cursor_move_column(-1); });
     m_keybinds.insert("j", [this] { current_buffer().cursor_move_line(1); });
@@ -23,14 +21,18 @@ Editor::Editor() {
     m_keybinds.insert("G", [this] {
         current_buffer().cursor_move_line(current_buffer().rope().line_count());
     });
-    m_keybinds.insert(
-        "0", [this] { current_buffer().cursor_move_column(-max_line_length); });
-    m_keybinds.insert(
-        "$", [this] { current_buffer().cursor_move_column(max_line_length); });
+    m_keybinds.insert("0", [this] {
+        current_buffer().cursor_move_column(-constants::max_line_length);
+    });
+    m_keybinds.insert("$", [this] {
+        current_buffer().cursor_move_column(constants::max_line_length);
+    });
     m_keybinds.insert("w",
                       [this] { current_buffer().cursor_move_next_word(); });
     m_keybinds.insert("b",
                       [this] { current_buffer().cursor_move_prev_word(); });
+
+    m_keybinds.insert("i", [this] { set_mode(EditorMode::Insert); });
 }
 
 Editor::Editor(std::string_view filename) : Editor{} { open(filename); }
@@ -84,9 +86,9 @@ void Editor::render() {
             y += line_height;
 
             std::size_t render_line_start = line_start + view.offset_column();
-            std::size_t render_line_len
-                = std::min(next_line_start - line_start - 1,
-                           static_cast<std::size_t>(view.columns(char_size)));
+            std::size_t render_line_len = std::min(
+                next_line_start - line_start - 1,
+                static_cast<std::size_t>(view.columns(char_size) - 1));
 
             std::string line
                 = content.substr(render_line_start, render_line_len);
@@ -102,10 +104,28 @@ void Editor::render() {
     }
 }
 
-void Editor::update() { normal_mode(); }
+void Editor::update() {
+    char c = GetCharPressed();
+
+    switch (m_mode) {
+    case EditorMode::Normal:
+        normal_mode(c);
+        break;
+    case EditorMode::Insert:
+        insert_mode(c);
+        break;
+    default:
+        break;
+    }
+}
 
 void Editor::open(std::string_view filename) {
-    m_buffers.emplace_back(filename);
+    if (filename.empty()) {
+        m_buffers.emplace_back();
+    } else {
+        m_buffers.emplace_back(filename);
+    }
+
     m_buffer_id = m_buffers.size() - 1;
 }
 
@@ -113,12 +133,37 @@ Buffer& Editor::current_buffer() { return m_buffers[m_buffer_id]; }
 
 const Buffer& Editor::current_buffer() const { return m_buffers[m_buffer_id]; }
 
-void Editor::normal_mode() {
-    char c = GetCharPressed();
+void Editor::set_mode(EditorMode mode) { m_mode = mode; }
 
+void Editor::normal_mode(char c) {
     if (c == '\0') {
         return;
     }
 
     m_keybinds.step(c);
+}
+
+void Editor::insert_mode(char c) {
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        set_mode(EditorMode::Normal);
+        return;
+    }
+
+    if (IsKeyPressed(KEY_ENTER)) {
+        current_buffer().insert_at_cursor("\n");
+        return;
+    }
+
+    if (IsKeyPressed(KEY_BACKSPACE)) {
+        current_buffer().erase_at_cursor();
+        return;
+    }
+
+    if (c == '\0') {
+        return;
+    }
+
+    current_buffer().insert_at_cursor(std::string{c});
+
+    std::cerr << current_buffer().rope() << '\n';
 }

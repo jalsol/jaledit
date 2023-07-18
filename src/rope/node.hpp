@@ -15,9 +15,10 @@ public:
     virtual std::string to_string() const = 0;
     virtual std::pair<Handle, Handle> split(std::size_t index) const = 0;
     virtual std::vector<Handle> leaves() const = 0;
-    virtual std::size_t find_line_start(std::size_t line_index) const = 0;
+    virtual std::size_t find_line_feed(std::size_t index) const = 0;
     virtual ~Node() = default;
 
+    std::size_t find_line_start(std::size_t line_index) const;
     std::size_t length() const;
     std::size_t depth() const;
     std::size_t lfcnt() const;
@@ -43,7 +44,7 @@ public:
     std::pair<Node::Handle, Node::Handle>
     split(std::size_t index) const override;
     std::vector<Node::Handle> leaves() const override;
-    std::size_t find_line_start(std::size_t line_index) const override;
+    std::size_t find_line_feed(std::size_t index) const override;
 
 private:
     using Node::m_depth;
@@ -70,7 +71,7 @@ public:
     std::pair<Node::Handle, Node::Handle>
     split(std::size_t index) const override;
     std::vector<Node::Handle> leaves() const override;
-    std::size_t find_line_start(std::size_t line_index) const override;
+    std::size_t find_line_feed(std::size_t index) const override;
 
 private:
     using Node::m_depth;

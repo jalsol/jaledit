@@ -63,13 +63,21 @@ Rope Rope::insert(std::size_t index, const Rope& other) const {
 Rope Rope::append(const std::string& text) const { return append(Rope{text}); }
 
 Rope Rope::append(const Rope& other) const {
-    return Rope{std::make_shared<Branch>(m_root, other.m_root)}.rebalance();
+    return Rope{std::make_shared<Branch>(m_root, other.m_root)};
+}
+
+Rope Rope::prepend(const std::string& text) const {
+    return prepend(Rope{text});
+}
+
+Rope Rope::prepend(const Rope& other) const {
+    return Rope{std::make_shared<Branch>(other.m_root, m_root)};
 }
 
 Rope Rope::erase(std::size_t start, std::size_t length) const {
     auto lhs = m_root->split(start);
     auto rhs = lhs.second->split(length);
-    return Rope{std::make_shared<Branch>(lhs.first, rhs.second)}.rebalance();
+    return Rope{std::make_shared<Branch>(lhs.first, rhs.second)};
 }
 
 Node::Handle Rope::leaves_merge(const std::vector<Node::Handle>& leaves,
@@ -108,8 +116,16 @@ std::pair<Rope, Rope> Rope::split(std::size_t index) const {
     return {Rope{left}, Rope{right}};
 }
 
+#include <iostream>
 std::size_t Rope::find_line_start(std::size_t index) const {
-    return m_root->find_line_start(index);
+    if (index == 0) {
+        return 0;
+    }
+    if (index >= line_count()) {
+        return length() + 1;
+    }
+
+    return m_root->find_line_feed(index - 1) + 1;
 }
 
 std::size_t Rope::line_count() const { return m_root->lfcnt() + 1; }
@@ -121,6 +137,11 @@ std::size_t Rope::line_length(std::size_t line_index) const {
 
     return m_root->find_line_start(line_index + 1)
          - m_root->find_line_start(line_index) - 1;
+}
+
+std::size_t Rope::index_from_pos(std::size_t line_index,
+                                 std::size_t line_pos) const {
+    return find_line_start(line_index) + line_pos;
 }
 
 bool Rope::operator==(const Rope& other) const {

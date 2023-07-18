@@ -53,8 +53,13 @@ public:
     void cursor_move_next_word();
     void cursor_move_prev_word();
 
+    void insert_at_cursor(const std::string& text);
+    void erase_at_cursor();
+
 private:
-    static constexpr std::size_t max_gap_size = 1024;
+    // The value of 32 is small enough for demo purposes,
+    // but in a real editor this value would be much larger.
+    static constexpr std::size_t max_gap_size = 32;
 
     Rope m_rope{};
     std::stack<Rope> m_undo{};
@@ -62,7 +67,6 @@ private:
 
     std::string m_gap{};
     std::size_t m_gap_start{};
-    std::size_t m_gap_end{};
 
     Cursor m_cursor{};
     View m_view{};
