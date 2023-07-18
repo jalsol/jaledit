@@ -160,18 +160,20 @@ void Editor::update() {
     int key = GetKeyPressed();
 
     if (key == KEY_NULL) {
+        if (IsKeyUp(prev_key)) {
+            prev_key = KEY_NULL;
+        }
+
         return;
     }
 
     if ((KEY_APOSTROPHE <= key && key <= KEY_GRAVE) || key == KEY_ENTER) {
         rv = modify_key(key, prev_key);
-        prev_key = KEY_NULL;
     } else if (KEY_LEFT_SHIFT <= key && key <= KEY_RIGHT_SUPER) {
         prev_key = key;
         return;
     } else {
         rv = {KEY_NULL, key};
-        prev_key = KEY_NULL;
     }
 
     switch (m_mode) {
