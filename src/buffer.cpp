@@ -9,6 +9,7 @@
 #include <cctype>
 #include <fstream>
 #include <string_view>
+#include <tuple>
 #include <vector>
 
 #include <fcntl.h>
@@ -203,7 +204,7 @@ void Buffer::cursor_move_prev_word() {
 
 void Buffer::insert_at_cursor(const std::string& text) {
     std::size_t pos = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
-    m_undo.push_back(m_rope);
+    m_undo.emplace_back(m_rope, m_cursor);
     m_redo.clear();
     m_rope = m_rope.insert(pos, text);
 
@@ -214,7 +215,7 @@ void Buffer::insert_at_cursor(const std::string& text) {
 
 void Buffer::append_at_cursor(const std::string& text) {
     std::size_t pos = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
-    m_undo.push_back(m_rope);
+    m_undo.emplace_back(m_rope, m_cursor);
     m_redo.clear();
     m_rope = m_rope.insert(pos + 1, text);
 
@@ -229,7 +230,7 @@ void Buffer::erase_at_cursor() {
         return;
     }
 
-    m_undo.push_back(m_rope);
+    m_undo.emplace_back(m_rope, m_cursor);
     m_redo.clear();
     cursor_move_prev_char();
     m_rope = m_rope.erase(pos - 1, 1);
@@ -240,8 +241,8 @@ void Buffer::undo() {
         return;
     }
 
-    m_redo.push_back(m_rope);
-    m_rope = m_undo.back();
+    m_redo.emplace_back(m_rope, m_cursor);
+    std::tie(m_rope, m_cursor) = m_undo.back();
     m_undo.pop_back();
 }
 
@@ -250,7 +251,7 @@ void Buffer::redo() {
         return;
     }
 
-    m_undo.push_back(m_rope);
-    m_rope = m_redo.back();
+    m_undo.emplace_back(m_rope, m_cursor);
+    std::tie(m_rope, m_cursor) = m_redo.back();
     m_redo.pop_back();
 }
