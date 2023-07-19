@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 struct Cursor {
@@ -65,8 +66,8 @@ private:
     static constexpr std::size_t max_gap_size = 32;
 
     Rope m_rope{};
-    std::vector<Rope> m_undo{};
-    std::vector<Rope> m_redo{};
+    std::vector<std::pair<Rope, Cursor>> m_undo{};
+    std::vector<std::pair<Rope, Cursor>> m_redo{};
 
     std::string m_gap{};
     std::size_t m_gap_start{};
