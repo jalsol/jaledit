@@ -72,14 +72,14 @@ Buffer::Buffer(std::string_view filename) : m_filename{filename} {
         mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
     std::size_t remaining = sb.st_size;
     char* buf_ptr = file_in_memory;
+    constexpr std::size_t buf_size = 1024 * 1024;
 
-    for (auto i = Rope::max_depth - 2; i > 0; --i) {
-        while (remaining >= fib(i)) {
-            m_rope = m_rope.append(std::string(buf_ptr, fib(i)));
-            buf_ptr += fib(i);
-            remaining -= fib(i);
-        }
+    while (remaining >= buf_size) {
+        m_rope = m_rope.append(std::string(buf_ptr, buf_size));
+        buf_ptr += buf_size;
+        remaining -= buf_size;
     }
+    m_rope = m_rope.append(std::string(buf_ptr, remaining));
 
     munmap(file_in_memory, sb.st_size);
     close(fd);
