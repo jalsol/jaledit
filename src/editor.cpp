@@ -57,6 +57,24 @@ Editor::Editor() {
     });
     m_keybinds.insert("u", [this] { current_buffer().undo(); });
     m_keybinds.insert("r", [this] { current_buffer().redo(); });
+    m_keybinds.insert("x", [this] {
+        auto& buffer = current_buffer();
+        const auto& cursor = buffer.cursor();
+        const auto& rope = buffer.rope();
+
+        char cur_char = rope[rope.index_from_pos(cursor.line, cursor.column)];
+        if (cur_char == '\n' || cur_char == '\0') {
+            return;
+        }
+
+        buffer.cursor_move_next_char();
+        buffer.erase_at_cursor();
+
+        cur_char = rope[rope.index_from_pos(cursor.line, cursor.column)];
+        if ((cur_char == '\n' || cur_char == '\0') && cursor.column > 0) {
+            buffer.cursor_move_prev_char();
+        }
+    });
 }
 
 Editor::Editor(std::string_view filename) : Editor{} { open(filename); }
