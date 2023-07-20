@@ -261,6 +261,19 @@ void Editor::insert_mode(Key key) {
     }
 
     current_buffer().insert_at_cursor(std::string{char(key.key)});
+
+    Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
+    const auto& view = current_buffer().view();
+
+    if (key.key == '\n') {
+        if (current_buffer().cursor().line
+            >= view.offset_line() + view.lines(char_size)) {
+            current_buffer().cursor_move_line(1);
+        } else if (current_buffer().cursor().line < view.offset_line()) {
+            current_buffer().cursor_move_line(-1);
+        }
+        current_buffer().cursor_move_column(-constants::max_line_length);
+    }
 }
 
 void Editor::undo() { current_buffer().undo(); }
