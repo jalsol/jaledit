@@ -52,7 +52,7 @@ bool View::viewable_column(int column, Vector2 char_size) const {
         && column < m_offset_column + columns(char_size);
 }
 
-Buffer::Buffer() : m_rope{""} {
+Buffer::Buffer() : m_rope{"\n"} {
     m_view.update_header_size(utils::number_len(m_rope.line_count()) + 2);
 }
 
@@ -288,6 +288,9 @@ void Buffer::erase_range(std::size_t start, std::size_t end) {
     m_redo.clear();
     m_rope = m_rope.erase(start, end - start);
     set_cursor(select_start());
+    if (m_rope.length() == 0) {
+        m_rope = m_rope.append("\n");
+    }
 }
 
 void Buffer::copy_selected() {
