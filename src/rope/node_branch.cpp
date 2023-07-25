@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+namespace rope {
+
 Branch::Branch(Handle left, Handle right)
     : m_left{std::move(left)}, m_right{std::move(right)} {
     m_weight = m_left ? m_left->length() : 0;
@@ -97,3 +99,5 @@ std::size_t Branch::find_line_feed(std::size_t index) const {
         return m_weight + m_right->find_line_feed(index - m_left->lfcnt());
     }
 }
+
+} // namespace rope

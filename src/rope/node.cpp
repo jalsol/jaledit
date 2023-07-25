@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+namespace rope {
+
 std::size_t Node::find_line_start(std::size_t line_index) const {
     if (line_index == 0) {
         return 0;
@@ -14,3 +16,5 @@ std::size_t Node::length() const { return m_length; }
 std::size_t Node::depth() const { return m_depth; }
 
 std::size_t Node::lfcnt() const { return m_lfcnt; }
+
+} // namespace rope

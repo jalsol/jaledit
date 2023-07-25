@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+namespace rope {
+
 class Node {
 public:
     using Handle = std::shared_ptr<Node>;
@@ -85,3 +87,5 @@ private:
     Node::Handle m_left{};
     Node::Handle m_right{};
 };
+
+} // namespace rope
