@@ -154,6 +154,30 @@ void Editor::render() {
 
     view.update_header_size(header_width);
 
+    // draw status
+    std::string_view status;
+
+    switch (m_mode) {
+    case EditorMode::Normal:
+        status = "NORMAL";
+        break;
+    case EditorMode::Insert:
+        status = "INSERT";
+        break;
+    case EditorMode::Visual:
+        status = "VISUAL";
+        break;
+    default:
+        utils::unreachable();
+    }
+
+    utils::draw_text(status.data(), {constants::margin, 0}, BLACK,
+                     constants::font_size, 0);
+
+    // draw status background
+    DrawRectangle(0, 0, GetScreenWidth(), constants::margin,
+                  ColorAlpha(ORANGE, 0.2F));
+
     // draw text and line numbers
     float y = constants::margin - line_height;
     std::size_t cur_line_idx = view.offset_line();
