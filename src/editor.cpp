@@ -174,6 +174,20 @@ void Editor::render() {
     utils::draw_text(status.data(), {constants::margin, 0}, BLACK,
                      constants::font_size, 0);
 
+    // draw filename
+
+    std::string_view filename = current_buffer().filename();
+    if (filename.empty()) {
+        filename = "new file";
+    }
+
+    utils::draw_text(
+        filename.data(),
+        {GetScreenWidth() - constants::margin
+             - utils::measure_text(filename.data(), constants::font_size, 0).x,
+         0},
+        BLACK, constants::font_size, 0);
+
     // draw status background
     DrawRectangle(0, 0, GetScreenWidth(), constants::margin,
                   ColorAlpha(ORANGE, 0.2F));
