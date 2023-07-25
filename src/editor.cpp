@@ -123,6 +123,14 @@ Editor::Editor() {
         std::size_t line_end = rope.find_line_start(cursor.line + 1) - 1;
         current_buffer().copy_range(line_start, line_end);
     });
+    m_keybinds.insert("dw", [this] {
+        auto& buffer = current_buffer();
+        auto cursor = buffer.cursor();
+
+        current_buffer().select_orig() = cursor;
+        current_buffer().cursor_move_next_word();
+        current_buffer().erase_selected();
+    });
 
     // TODO:
     // - implement search
