@@ -22,4 +22,12 @@ Vector2 measure_text(const char* text, float font_size, float spacing) {
 
 bool is_vim_alnum(int c) { return !!std::isalnum(c) || c == '_' || c == '-'; }
 
+void unreachable() {
+#if defined(_MSC_VER)
+    __assume(0);
+#else
+    __builtin_unreachable();
+#endif
+}
+
 } // namespace utils

@@ -121,13 +121,13 @@ std::size_t Rope::find_line_start(std::size_t index) const {
         return 0;
     }
     if (index >= line_count()) {
-        return length() + 1;
+        return length();
     }
 
     return m_root->find_line_feed(index - 1) + 1;
 }
 
-std::size_t Rope::line_count() const { return m_root->lfcnt() + 1; }
+std::size_t Rope::line_count() const { return m_root->lfcnt(); }
 
 std::size_t Rope::line_length(std::size_t line_index) const {
     if (line_index == line_count() - 1) {

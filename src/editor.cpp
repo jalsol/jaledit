@@ -11,10 +11,14 @@
 #include <string_view>
 
 Editor::Editor() {
-    m_keybinds.insert("h", [this] { current_buffer().cursor_move_column(-1); });
+    m_keybinds.insert("h", [this] {
+        current_buffer().cursor_move_column(-1, m_mode == EditorMode::Visual);
+    });
     m_keybinds.insert("j", [this] { current_buffer().cursor_move_line(1); });
     m_keybinds.insert("k", [this] { current_buffer().cursor_move_line(-1); });
-    m_keybinds.insert("l", [this] { current_buffer().cursor_move_column(1); });
+    m_keybinds.insert("l", [this] {
+        current_buffer().cursor_move_column(1, m_mode == EditorMode::Visual);
+    });
     m_keybinds.insert("gg", [this] {
         current_buffer().cursor_move_line(
             -current_buffer().rope().line_count());
@@ -23,10 +27,12 @@ Editor::Editor() {
         current_buffer().cursor_move_line(current_buffer().rope().line_count());
     });
     m_keybinds.insert("0", [this] {
-        current_buffer().cursor_move_column(-constants::max_line_length);
+        current_buffer().cursor_move_column(-constants::max_line_length,
+                                            m_mode == EditorMode::Visual);
     });
     m_keybinds.insert("$", [this] {
-        current_buffer().cursor_move_column(constants::max_line_length);
+        current_buffer().cursor_move_column(constants::max_line_length,
+                                            m_mode == EditorMode::Visual);
     });
     m_keybinds.insert("w",
                       [this] { current_buffer().cursor_move_next_word(); });
@@ -34,14 +40,20 @@ Editor::Editor() {
                       [this] { current_buffer().cursor_move_prev_word(); });
 
     m_keybinds.insert("i", [this] { set_mode(EditorMode::Insert); });
+    m_keybinds.insert("v", [this] {
+        current_buffer().select_orig() = current_buffer().cursor();
+        set_mode(EditorMode::Visual);
+    });
     m_keybinds.insert("o", [this] {
-        current_buffer().cursor_move_column(constants::max_line_length);
+        current_buffer().cursor_move_column(constants::max_line_length,
+                                            m_mode == EditorMode::Visual);
         current_buffer().append_at_cursor("\n");
         current_buffer().cursor_move_line(1);
         set_mode(EditorMode::Insert);
     });
     m_keybinds.insert("O", [this] {
-        current_buffer().cursor_move_column(-constants::max_line_length);
+        current_buffer().cursor_move_column(-constants::max_line_length,
+                                            m_mode == EditorMode::Visual);
         current_buffer().insert_at_cursor("\n");
         current_buffer().cursor_move_line(-1);
         set_mode(EditorMode::Insert);
@@ -51,7 +63,8 @@ Editor::Editor() {
         set_mode(EditorMode::Insert);
     });
     m_keybinds.insert("A", [this] {
-        current_buffer().cursor_move_column(constants::max_line_length);
+        current_buffer().cursor_move_column(constants::max_line_length,
+                                            m_mode == EditorMode::Visual);
         current_buffer().cursor_move_next_char();
         set_mode(EditorMode::Insert);
     });
@@ -75,6 +88,45 @@ Editor::Editor() {
             buffer.cursor_move_prev_char();
         }
     });
+    m_keybinds.insert("p", [this] {
+        auto& buffer = current_buffer();
+        auto cursor = buffer.cursor();
+        const auto& rope = buffer.rope();
+
+        if (rope[rope.index_from_pos(cursor.line, cursor.column)] == '\n') {
+            buffer.insert_at_cursor(GetClipboardText());
+            buffer.cursor_move_column(-1, false);
+        } else {
+            buffer.append_at_cursor(GetClipboardText());
+        }
+
+        buffer.set_cursor(cursor);
+    });
+    m_keybinds.insert("dd", [this] {
+        auto& buffer = current_buffer();
+        const auto& cursor = buffer.cursor();
+        const auto& rope = buffer.rope();
+
+        int line_start = rope.find_line_start(cursor.line);
+        int next_line_start = rope.find_line_start(cursor.line + 1);
+        current_buffer().select_orig()
+            = {cursor.line, next_line_start - line_start};
+        current_buffer().cursor_move_column(-constants::max_line_length, false);
+        current_buffer().erase_range(line_start, next_line_start);
+    });
+    m_keybinds.insert("yy", [this] {
+        auto& buffer = current_buffer();
+        const auto& cursor = buffer.cursor();
+        const auto& rope = buffer.rope();
+
+        std::size_t line_start = rope.find_line_start(cursor.line);
+        std::size_t line_end = rope.find_line_start(cursor.line + 1) - 1;
+        current_buffer().copy_range(line_start, line_end);
+    });
+
+    // TODO:
+    // - implement search
+    // - implement replace
 }
 
 Editor::Editor(std::string_view filename) : Editor{} { open(filename); }
@@ -94,35 +146,15 @@ void Editor::render() {
 
     view.update_header_size(header_width);
 
-    // draw cursorline
-    const int cursor_y
-        = constants::margin + (cursor.line - view.offset_line()) * line_height;
-
-    // draw block cursor
-    const float cursor_x
-        = constants::margin
-        + (header_width + 1 + cursor.column - view.offset_column())
-              * char_size.x;
-
-    if (view.viewable_line(cursor.line, char_size)) {
-        // draw cursorline
-        DrawRectangle(0, cursor_y, GetScreenWidth(), line_height,
-                      ColorAlpha(GRAY, 0.15F));
-
-        // draw block cursor
-        if (view.viewable_column(cursor.column, char_size)) {
-            DrawRectangle(cursor_x, cursor_y, line_width, line_height,
-                          ColorAlpha(ORANGE, 0.45F));
-        }
-    }
-
     // draw text and line numbers
     float y = constants::margin - line_height;
     std::size_t cur_line_idx = view.offset_line();
     std::size_t line_start = content.find_line_start(cur_line_idx);
+    std::size_t next_line_start;
 
-    for (; cur_line_idx < content.line_count(); ++cur_line_idx) {
-        std::size_t next_line_start = content.find_line_start(cur_line_idx + 1);
+    for (; cur_line_idx < content.line_count();
+         ++cur_line_idx, line_start = next_line_start) {
+        next_line_start = content.find_line_start(cur_line_idx + 1);
 
         if (!view.viewable_line(cur_line_idx, char_size)) {
             break;
@@ -143,7 +175,69 @@ void Editor::render() {
         utils::draw_text(line_text, {constants::margin, y}, BLACK,
                          constants::font_size, 0);
 
-        line_start = next_line_start;
+        if (m_mode == EditorMode::Visual) {
+            const auto& select_start = current_buffer().select_start();
+            const auto& select_end = current_buffer().select_end();
+
+            std::size_t select_start_idx = content.index_from_pos(
+                select_start.line, select_start.column);
+            std::size_t select_end_idx
+                = content.index_from_pos(select_end.line, select_end.column);
+
+            if (select_end_idx < render_line_start
+                || select_start_idx > render_line_start + render_line_len - 1) {
+                continue;
+            }
+
+            std::size_t select_start_col
+                = std::max(render_line_start, select_start_idx)
+                - render_line_start;
+            std::size_t select_end_col
+                = std::min(render_line_start + render_line_len - 1,
+                           select_end_idx)
+                - render_line_start;
+
+            float select_x
+                = constants::margin
+                + (header_width + 1 + select_start_col - view.offset_column())
+                      * char_size.x;
+            int select_len = select_end_col - select_start_col + 1;
+
+            if (select_len == 0) {
+                select_len = 1;
+            }
+
+            float select_width = select_len * char_size.x;
+
+            DrawRectangle(select_x, y, select_width, line_height,
+                          ColorAlpha(GRAY, 0.3F));
+        }
+    }
+
+    // draw cursorline
+    const int cursor_y
+        = constants::margin + (cursor.line - view.offset_line()) * line_height;
+
+    // draw block cursor
+    const float cursor_x
+        = constants::margin
+        + (header_width + 1 + cursor.column - view.offset_column())
+              * char_size.x;
+
+    if (view.viewable_line(cursor.line, char_size)) {
+        if (m_mode != EditorMode::Visual) {
+            // draw cursorline
+            DrawRectangle(0, cursor_y, GetScreenWidth(), line_height,
+                          ColorAlpha(GRAY, 0.15F));
+        }
+
+        if (m_mode != EditorMode::Command) {
+            // draw block cursor
+            if (view.viewable_column(cursor.column, char_size)) {
+                DrawRectangle(cursor_x, cursor_y, line_width, line_height,
+                              ColorAlpha(ORANGE, 0.45F));
+            }
+        }
     }
 }
 
@@ -223,8 +317,11 @@ void Editor::update() {
     case EditorMode::Insert:
         insert_mode(rv);
         break;
-    default:
+    case EditorMode::Visual:
+        visual_mode(rv);
         break;
+    default:
+        utils::unreachable();
     }
 }
 
@@ -244,6 +341,20 @@ const Buffer& Editor::current_buffer() const { return m_buffers[m_buffer_id]; }
 
 void Editor::set_mode(EditorMode mode) { m_mode = mode; }
 
+void Editor::reset_to_normal_mode() {
+    const auto& cursor = current_buffer().cursor();
+    const auto& rope = current_buffer().rope();
+
+    if (cursor.column > 0) {
+        std::size_t index = rope.index_from_pos(cursor.line, cursor.column);
+        if (rope[index] == '\n' || rope[index] == '\0') {
+            current_buffer().cursor_move_column(-1, false);
+        }
+    }
+
+    set_mode(EditorMode::Normal);
+}
+
 void Editor::normal_mode(Key key) {
     if (key.modifier != KEY_NULL) {
         m_keybinds.reset_step();
@@ -254,17 +365,7 @@ void Editor::normal_mode(Key key) {
 
 void Editor::insert_mode(Key key) {
     if (key.key == KEY_ESCAPE) {
-        const auto& cursor = current_buffer().cursor();
-        const auto& rope = current_buffer().rope();
-
-        if (cursor.column > 0) {
-            std::size_t index = rope.index_from_pos(cursor.line, cursor.column);
-            if (rope[index] == '\n' || rope[index] == '\0') {
-                current_buffer().cursor_move_column(-1);
-            }
-        }
-
-        set_mode(EditorMode::Normal);
+        reset_to_normal_mode();
         return;
     }
 
@@ -290,8 +391,31 @@ void Editor::insert_mode(Key key) {
         } else if (current_buffer().cursor().line < view.offset_line()) {
             current_buffer().cursor_move_line(-1);
         }
-        current_buffer().cursor_move_column(-constants::max_line_length);
+        current_buffer().cursor_move_column(-constants::max_line_length, false);
     }
+}
+
+void Editor::visual_mode(Key key) {
+    if (key.key == KEY_ESCAPE) {
+        reset_to_normal_mode();
+        return;
+    }
+
+    if (key.modifier == KEY_NULL) {
+        switch (key.key) {
+        case 'd':
+            current_buffer().erase_selected();
+            reset_to_normal_mode();
+            return;
+        case 'y':
+            current_buffer().copy_selected();
+            return;
+        default:
+            break;
+        }
+    }
+
+    normal_mode(key);
 }
 
 void Editor::undo() { current_buffer().undo(); }
