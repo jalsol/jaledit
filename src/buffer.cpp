@@ -220,7 +220,7 @@ void Buffer::cursor_move_prev_word() {
     cursor_move_prev_char();
     std::size_t index = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
 
-    while (std::isspace(m_rope[index])) {
+    while (index > 0 && std::isspace(m_rope[index])) {
         cursor_move_prev_char();
         --index;
     }
@@ -230,7 +230,7 @@ void Buffer::cursor_move_prev_word() {
     }
 
     // if already in word, move to beginning of word
-    while (std::isalnum(m_rope[index - 1])) {
+    while (index > 0 && std::isalnum(m_rope[index - 1])) {
         cursor_move_prev_char();
         --index;
     }
