@@ -210,6 +210,11 @@ void Buffer::cursor_move_next_word() {
             ++index;
         }
     }
+
+    if (!m_view.viewable(m_cursor.line, m_cursor.column,
+                         utils::measure_text(" ", constants::font_size, 0))) {
+        m_view.update_offset_line(m_view.offset_line() + 1);
+    }
 }
 
 void Buffer::cursor_move_prev_word() {
@@ -233,6 +238,11 @@ void Buffer::cursor_move_prev_word() {
     while (index > 0 && std::isalnum(m_rope[index - 1])) {
         cursor_move_prev_char();
         --index;
+    }
+
+    if (!m_view.viewable(m_cursor.line, m_cursor.column,
+                         utils::measure_text(" ", constants::font_size, 0))) {
+        m_view.update_offset_line(m_view.offset_line() - 1);
     }
 }
 
