@@ -100,16 +100,6 @@ void Buffer::set_cursor(Cursor cursor) {
         m_view.update_offset_line(m_cursor.line);
         m_view.update_offset_column(m_cursor.column);
     }
-
-    // if (m_cursor.line != cursor.line) {
-    //     m_cursor.line = cursor.line;
-    //     m_view.update_offset_line(m_cursor.line);
-    // }
-
-    // if (m_cursor.column != cursor.column) {
-    //     m_cursor.column = cursor.column;
-    //     m_view.update_offset_column(m_cursor.column);
-    // }
 }
 
 const Rope& Buffer::rope() const { return m_rope; }
@@ -152,8 +142,12 @@ void Buffer::cursor_move_column(int delta, bool move_on_eol) {
     const Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
     int line_length = m_rope.line_length(m_cursor.line);
 
+    int right_offset
+        = !move_on_eol
+        + (m_cursor.line + 1 == static_cast<int>(m_rope.line_count()));
+
     m_cursor.column
-        = std::clamp(m_cursor.column + delta, 0, line_length - !move_on_eol);
+        = std::clamp(m_cursor.column + delta, 0, line_length - right_offset);
     if (m_cursor.column < 0) {
         m_cursor.column = 0;
     }
@@ -193,13 +187,16 @@ void Buffer::cursor_move_next_word() {
     bool alnum_word = !!std::isalnum(c);
     bool punct_word = !!std::ispunct(c);
 
+    // NOTE: m_rope.length() contains a terminating null character
+    // so we need to subtract 2 to get the last character
+
     // if already in word, move to end of word
     if (alnum_word) {
-        while (std::isalnum(m_rope[index])) {
+        while (index + 2 < m_rope.length() && std::isalnum(m_rope[index])) {
             cursor_move_next_char();
             ++index;
         }
-    } else if (punct_word) {
+    } else if (index + 2 < m_rope.length() && punct_word) {
         cursor_move_next_char();
         ++index;
         if (std::ispunct(m_rope[index])) {
@@ -208,7 +205,7 @@ void Buffer::cursor_move_next_word() {
     }
 
     if (std::isspace(m_rope[index])) {
-        while (std::isspace(m_rope[index])) {
+        while (index + 2 < m_rope.length() && std::isspace(m_rope[index])) {
             cursor_move_next_char();
             ++index;
         }
@@ -216,6 +213,10 @@ void Buffer::cursor_move_next_word() {
 }
 
 void Buffer::cursor_move_prev_word() {
+    if (m_cursor.line == 0 && m_cursor.column == 0) {
+        return;
+    }
+
     cursor_move_prev_char();
     std::size_t index = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
 
