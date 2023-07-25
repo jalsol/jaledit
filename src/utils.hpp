@@ -28,4 +28,6 @@ int number_len(Tp n) {
 
 bool is_vim_alnum(int c);
 
+void unreachable();
+
 } // namespace utils

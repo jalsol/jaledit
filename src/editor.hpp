@@ -11,6 +11,7 @@ enum class EditorMode {
     Normal,
     Insert,
     Command,
+    Visual,
 };
 
 struct Key {
@@ -37,8 +38,10 @@ private:
     const Buffer& current_buffer() const;
 
     void set_mode(EditorMode mode);
+    void reset_to_normal_mode();
     void normal_mode(Key key);
     void insert_mode(Key key);
+    void visual_mode(Key key);
     void undo();
     void redo();
 };

@@ -92,11 +92,43 @@ Cursor& Buffer::cursor() { return m_cursor; }
 
 const Cursor& Buffer::cursor() const { return m_cursor; }
 
+void Buffer::set_cursor(Cursor cursor) {
+    m_cursor = cursor;
+
+    if (!m_view.viewable(m_cursor.line, m_cursor.column,
+                         utils::measure_text(" ", constants::font_size, 0))) {
+        m_view.update_offset_line(m_cursor.line);
+        m_view.update_offset_column(m_cursor.column);
+    }
+
+    // if (m_cursor.line != cursor.line) {
+    //     m_cursor.line = cursor.line;
+    //     m_view.update_offset_line(m_cursor.line);
+    // }
+
+    // if (m_cursor.column != cursor.column) {
+    //     m_cursor.column = cursor.column;
+    //     m_view.update_offset_column(m_cursor.column);
+    // }
+}
+
 const Rope& Buffer::rope() const { return m_rope; }
 
 View& Buffer::view() { return m_view; }
 
 const View& Buffer::view() const { return m_view; }
+
+Cursor& Buffer::select_orig() { return m_select_orig; }
+
+const Cursor& Buffer::select_orig() const { return m_select_orig; }
+
+const Cursor& Buffer::select_start() const {
+    return m_cursor < m_select_orig ? m_cursor : m_select_orig;
+}
+
+const Cursor& Buffer::select_end() const {
+    return m_cursor > m_select_orig ? m_cursor : m_select_orig;
+}
 
 void Buffer::cursor_move_line(int delta) {
     const Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
@@ -104,7 +136,7 @@ void Buffer::cursor_move_line(int delta) {
     m_cursor.line = std::clamp(m_cursor.line + delta, 0,
                                static_cast<int>(m_rope.line_count()) - 1);
 
-    cursor_move_column(0);
+    cursor_move_column(0, false);
 
     if (!m_view.viewable_line(m_cursor.line, char_size)) {
         if (delta < 0) {
@@ -116,11 +148,12 @@ void Buffer::cursor_move_line(int delta) {
     }
 }
 
-void Buffer::cursor_move_column(int delta) {
+void Buffer::cursor_move_column(int delta, bool move_on_eol) {
     const Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
     int line_length = m_rope.line_length(m_cursor.line);
 
-    m_cursor.column = std::clamp(m_cursor.column + delta, 0, line_length - 1);
+    m_cursor.column
+        = std::clamp(m_cursor.column + delta, 0, line_length - !move_on_eol);
     if (m_cursor.column < 0) {
         m_cursor.column = 0;
     }
@@ -236,13 +269,52 @@ void Buffer::erase_at_cursor() {
     m_rope = m_rope.erase(pos - 1, 1);
 }
 
+void Buffer::erase_selected() {
+    auto sel_start = select_start();
+    auto sel_end = select_end();
+
+    std::size_t start_idx
+        = m_rope.index_from_pos(sel_start.line, sel_start.column);
+    std::size_t end_idx = m_rope.index_from_pos(sel_end.line, sel_end.column);
+
+    erase_range(start_idx, end_idx);
+}
+
+void Buffer::erase_range(std::size_t start, std::size_t end) {
+    copy_range(start, end);
+
+    m_undo.emplace_back(m_rope, select_start());
+    m_redo.clear();
+    m_rope = m_rope.erase(start, end - start);
+    set_cursor(select_start());
+}
+
+void Buffer::copy_selected() {
+    auto sel_start = select_start();
+    auto sel_end = select_end();
+
+    std::size_t start_idx
+        = m_rope.index_from_pos(sel_start.line, sel_start.column);
+    std::size_t end_idx = m_rope.index_from_pos(sel_end.line, sel_end.column);
+
+    SetClipboardText(m_rope.substr(start_idx, end_idx - start_idx).c_str());
+
+    set_cursor(sel_start);
+}
+
+void Buffer::copy_range(std::size_t start, std::size_t end) {
+    SetClipboardText(m_rope.substr(start, end - start).c_str());
+}
+
 void Buffer::undo() {
     if (m_undo.empty()) {
         return;
     }
 
     m_redo.emplace_back(m_rope, m_cursor);
-    std::tie(m_rope, m_cursor) = m_undo.back();
+    const auto& [prev_rope, prev_cursor] = m_undo.back();
+    m_rope = std::move(prev_rope);
+    set_cursor(prev_cursor);
     m_undo.pop_back();
 }
 
@@ -252,6 +324,8 @@ void Buffer::redo() {
     }
 
     m_undo.emplace_back(m_rope, m_cursor);
-    std::tie(m_rope, m_cursor) = m_redo.back();
+    const auto& [next_rope, next_cursor] = m_redo.back();
+    m_rope = std::move(next_rope);
+    set_cursor(next_cursor);
     m_redo.pop_back();
 }
