@@ -120,6 +120,8 @@ const Cursor& Buffer::select_end() const {
     return m_cursor > m_select_orig ? m_cursor : m_select_orig;
 }
 
+std::string_view Buffer::filename() const { return m_filename; }
+
 void Buffer::cursor_move_line(int delta) {
     const Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
 

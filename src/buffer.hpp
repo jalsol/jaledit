@@ -57,6 +57,8 @@ public:
     const Cursor& select_start() const;
     const Cursor& select_end() const;
 
+    std::string_view filename() const;
+
     void cursor_move_line(int delta);
     void cursor_move_column(int delta, bool move_on_eol);
     void cursor_move_next_char();
