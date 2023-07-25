@@ -2,6 +2,8 @@
 
 #include "rope/utils.hpp"
 
+using namespace rope;
+
 Rope::Rope() : Rope{""} {}
 
 Rope::Rope(const std::string& text) : m_root{std::make_shared<Leaf>(text)} {}

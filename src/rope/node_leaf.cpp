@@ -5,6 +5,8 @@
 #include <utility>
 #include <vector>
 
+namespace rope {
+
 Leaf::Leaf(const std::string& text) : m_text{text} {
     m_weight = text.length();
     m_length = text.length();
@@ -40,3 +42,5 @@ std::vector<Node::Handle> Leaf::leaves() const {
 std::size_t Leaf::find_line_feed(std::size_t index) const {
     return m_lfpos.at(index);
 }
+
+} // namespace rope

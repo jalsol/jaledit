@@ -5,12 +5,10 @@
 #include <concepts>
 #include <string_view>
 
-namespace keybind {
-
-class Trie {
+class Keybind {
 public:
-    Trie();
-    ~Trie();
+    Keybind();
+    ~Keybind();
 
     template<std::invocable Func>
     void insert(std::string_view keyseq, Func func);
@@ -19,10 +17,10 @@ public:
     void reset_step();
 
 private:
+    using Node = keybind::Node;
+
     Node* m_root{new Node};
     Node* m_current{};
 };
-
-} // namespace keybind
 
 #include "keybind/trie_inl.hpp"

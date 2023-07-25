@@ -32,7 +32,7 @@ private:
     std::vector<Buffer> m_buffers{};
     std::size_t m_buffer_id{};
     EditorMode m_mode{EditorMode::Normal};
-    keybind::Trie m_keybinds;
+    Keybind m_keybinds;
 
     Buffer& current_buffer();
     const Buffer& current_buffer() const;

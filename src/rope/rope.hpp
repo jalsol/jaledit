@@ -7,6 +7,9 @@
 #include <string>
 
 class Rope {
+private:
+    using Node = rope::Node;
+
 public:
     static constexpr std::size_t max_depth = 64;
 
