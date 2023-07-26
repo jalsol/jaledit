@@ -6,47 +6,69 @@
 #include <cctype>
 #include <string_view>
 
-constexpr std::array<LiteralToken, 7> literal_tokens = {{
-    {"(", TokenKind::OpenParen},
-    {")", TokenKind::CloseParen},
-    {"{", TokenKind::OpenCurly},
-    {"}", TokenKind::CloseCurly},
-    {";", TokenKind::Semicolon},
-    {"[[", TokenKind::OpenAttr},
-    {"]]", TokenKind::CloseAttr},
+constexpr std::array<LiteralToken, 41> literal_tokens = {{
+    {"(", TokenKind::OpenParen},  {")", TokenKind::CloseParen},
+    {"{", TokenKind::OpenCurly},  {"}", TokenKind::CloseCurly},
+    {"[", TokenKind::OpenSquare}, {"]", TokenKind::CloseSquare},
+    {";", TokenKind::Semicolon},  {"[[", TokenKind::OpenAttr},
+    {"]]", TokenKind::CloseAttr}, {"->", TokenKind::Operator},
+    {"::", TokenKind::Operator},  {"<<", TokenKind::Operator},
+    {">>", TokenKind::Operator},  {"+=", TokenKind::Operator},
+    {"-=", TokenKind::Operator},  {"*=", TokenKind::Operator},
+    {"/=", TokenKind::Operator},  {"%=", TokenKind::Operator},
+    {"<=", TokenKind::Operator},  {">=", TokenKind::Operator},
+    {"!=", TokenKind::Operator},  {"&=", TokenKind::Operator},
+    {"~=", TokenKind::Operator},  {"^=", TokenKind::Operator},
+    {"==", TokenKind::Operator},  {".", TokenKind::Operator},
+    {",", TokenKind::Operator},   {"?", TokenKind::Operator},
+    {":", TokenKind::Operator},   {"+", TokenKind::Operator},
+    {"-", TokenKind::Operator},   {"*", TokenKind::Operator},
+    {"/", TokenKind::Operator},   {"%", TokenKind::Operator},
+    {"<", TokenKind::Operator},   {">", TokenKind::Operator},
+    {"!", TokenKind::Operator},   {"&", TokenKind::Operator},
+    {"~", TokenKind::Operator},   {"^", TokenKind::Operator},
+    {"=", TokenKind::Operator},
 }};
 
-constexpr std::array<std::string_view, 98> keywords = {{
+constexpr std::array<std::string_view, 14> types = {{
+    "bool",
+    "char",
+    "float",
+    "double",
+    "int",
+    "long",
+    "short",
+    "signed",
+    "unsigned",
+    "void",
+    "char16_t",
+    "char32_t",
+    "char8_t",
+    "wchar_t",
+}};
+
+constexpr std::array<std::string_view, 84> keywords = {{
     "auto",
     "break",
     "case",
-    "char",
     "const",
     "continue",
     "default",
     "do",
-    "double",
     "else",
     "enum",
     "extern",
-    "float",
     "for",
     "goto",
     "if",
-    "int",
-    "long",
     "register",
     "return",
-    "short",
-    "signed",
     "sizeof",
     "static",
     "struct",
     "switch",
     "typedef",
     "union",
-    "unsigned",
-    "void",
     "volatile",
     "while",
     "alignas",
@@ -59,11 +81,7 @@ constexpr std::array<std::string_view, 98> keywords = {{
     "atomic_noexcept",
     "bitand",
     "bitor",
-    "bool",
     "catch",
-    "char16_t",
-    "char32_t",
-    "char8_t",
     "class",
     "co_await",
     "co_return",
@@ -112,7 +130,6 @@ constexpr std::array<std::string_view, 98> keywords = {{
     "typename",
     "using",
     "virtual",
-    "wchar_t",
     "xor",
     "xor_eq",
 }};
@@ -149,6 +166,23 @@ Token Lexer::next() {
         skip(1);
 
         while (m_pos < m_text.size() && m_text[m_pos] != '"'
+               && m_text[m_pos] != '\n') {
+            skip(1);
+        }
+
+        if (m_pos < m_text.size()) {
+            skip(1);
+        }
+
+        token.set_text(m_text.substr(old_pos, m_pos - old_pos));
+        return token;
+    }
+
+    if (m_text[m_pos] == '\'') {
+        token.set_kind(TokenKind::Char);
+        skip(1);
+
+        while (m_pos < m_text.size() && m_text[m_pos] != '\''
                && m_text[m_pos] != '\n') {
             skip(1);
         }
@@ -209,7 +243,14 @@ Token Lexer::next() {
         token.set_text(symbol);
 
         if (std::toupper(m_text[old_pos]) == m_text[old_pos]) {
-            token.set_kind(TokenKind::Class);
+            token.set_kind(TokenKind::Type);
+        }
+
+        for (auto type : types) {
+            if (len == type.size() && type == symbol) {
+                token.set_kind(TokenKind::Type);
+                break;
+            }
         }
 
         for (auto keyword : keywords) {
@@ -217,6 +258,10 @@ Token Lexer::next() {
                 token.set_kind(TokenKind::Keyword);
                 break;
             }
+        }
+
+        if (m_pos + 1 < m_text.size() && m_text[m_pos] == '(') {
+            token.set_kind(TokenKind::Function);
         }
 
         return token;
