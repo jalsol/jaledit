@@ -38,26 +38,10 @@ enum class TokenKind : std::size_t {
 };
 
 constexpr std::array<std::string_view, constants::token_count> kind_names = {{
-    "end",
-    "invalid",
-    "preproc",
-    "symbol",
-    "open_paren",
-    "close_paren",
-    "open_curly",
-    "close_curly",
-    "open_square",
-    "close_square"
-    "open_attr",
-    "close_attr",
-    "semicolon",
-    "keyword",
-    "comment",
-    "string",
-    "char",
-    "type",
-    "number",
-    "function",
+    "end",         "invalid",    "preproc",     "symbol",      "open_paren",
+    "close_paren", "open_curly", "close_curly", "open_square", "close_square",
+    "open_attr",   "close_attr", "semicolon",   "keyword",     "comment",
+    "string",      "char",       "type",        "number",      "function",
     "operator",
 }};
 
