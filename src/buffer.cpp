@@ -7,7 +7,9 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <fstream>
+#include <iostream>
 #include <string_view>
 #include <tuple>
 #include <vector>
@@ -121,6 +123,8 @@ const Cursor& Buffer::select_end() const {
 }
 
 std::string_view Buffer::filename() const { return m_filename; }
+
+bool Buffer::dirty() const { return m_dirty; }
 
 void Buffer::cursor_move_line(int delta) {
     const Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
@@ -253,6 +257,7 @@ void Buffer::insert_at_cursor(const std::string& text) {
     m_undo.emplace_back(m_rope, m_cursor);
     m_redo.clear();
     m_rope = m_rope.insert(pos, text);
+    m_dirty = true;
 
     for (auto _ = text.size(); _ > 0; --_) {
         cursor_move_next_char();
@@ -264,6 +269,7 @@ void Buffer::append_at_cursor(const std::string& text) {
     m_undo.emplace_back(m_rope, m_cursor);
     m_redo.clear();
     m_rope = m_rope.insert(pos + 1, text);
+    m_dirty = true;
 
     for (auto _ = text.size(); _ > 0; --_) {
         cursor_move_next_char();
@@ -280,6 +286,7 @@ void Buffer::erase_at_cursor() {
     m_redo.clear();
     cursor_move_prev_char();
     m_rope = m_rope.erase(pos - 1, 1);
+    m_dirty = true;
 }
 
 void Buffer::erase_selected() {
@@ -299,6 +306,8 @@ void Buffer::erase_range(std::size_t start, std::size_t end) {
     m_undo.emplace_back(m_rope, select_start());
     m_redo.clear();
     m_rope = m_rope.erase(start, end - start);
+    m_dirty = true;
+
     set_cursor(select_start());
     if (m_rope.length() == 0) {
         m_rope = m_rope.append("\n");
@@ -332,6 +341,7 @@ void Buffer::undo() {
     m_rope = std::move(prev_rope);
     set_cursor(prev_cursor);
     m_undo.pop_back();
+    m_dirty = true;
 }
 
 void Buffer::redo() {
@@ -344,4 +354,61 @@ void Buffer::redo() {
     m_rope = std::move(next_rope);
     set_cursor(next_cursor);
     m_redo.pop_back();
+    m_dirty = true;
+}
+
+void Buffer::save() {
+    if (m_filename.empty()) {
+        return;
+    }
+
+    int fd = open(m_filename.data(), O_RDWR | O_CREAT | O_TRUNC, (mode_t)0600);
+    if (fd == -1) {
+        throw std::runtime_error{"Could not open file"};
+    }
+
+    std::size_t text_size = m_rope.length();
+
+    if (lseek(fd, text_size - 1, SEEK_SET) == -1) {
+        close(fd);
+        throw std::runtime_error{"Could not seek to end of file"};
+    }
+
+    if (write(fd, "", 1) == -1) {
+        close(fd);
+        throw std::runtime_error{"Could not write to file"};
+    }
+
+    char* map = static_cast<char*>(
+        mmap(0, text_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
+
+    if (map == MAP_FAILED) {
+        close(fd);
+        throw std::runtime_error{"Could not mmap file"};
+    }
+
+    constexpr std::size_t buf_size = 1024 * 1024;
+    std::size_t i;
+
+    for (i = 0; i + buf_size < text_size; i += buf_size) {
+        std::strncpy(map + i, m_rope.substr(i, buf_size).c_str(), buf_size);
+    }
+
+    std::strncpy(map + i, m_rope.substr(i, text_size - i).c_str(),
+                 text_size - i);
+
+    if (msync(map, text_size, MS_SYNC) == -1) {
+        close(fd);
+        munmap(map, text_size);
+        throw std::runtime_error{"Could not sync file"};
+    }
+
+    if (munmap(map, text_size) == -1) {
+        close(fd);
+        throw std::runtime_error{"Could not unmap file"};
+    }
+
+    close(fd);
+    std::cerr << "Saved " << m_filename << "\n";
+    m_dirty = false;
 }
