@@ -210,8 +210,14 @@ void Editor::render() {
         y += line_height;
 
         std::size_t render_line_start = line_start + view.offset_column();
+        std::size_t line_len = next_line_start - line_start;
+
+        if (cur_line_idx + 1 == content.line_count()) {
+            ++line_len;
+        }
+
         std::size_t render_line_len
-            = std::min(next_line_start - line_start - 1,
+            = std::min(line_len - 1,
                        static_cast<std::size_t>(view.columns(char_size) - 1));
 
         std::string line = content.substr(render_line_start, render_line_len);
