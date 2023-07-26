@@ -48,6 +48,10 @@ add_executable(${PROJECT_NAME}
     src/rope/node_branch.cpp
     src/rope/utils.cpp
 
+    src/highlight/lexer.cpp
+    src/highlight/token.cpp
+    src/highlight/highlight.cpp
+
     src/buffer.cpp
     src/editor.cpp
 )
