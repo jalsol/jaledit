@@ -244,10 +244,14 @@ void Editor::render() {
                 break;
             }
 
-            utils::draw_text(token.token.text().data(), {x, y}, token.color,
+            std::string_view text = token.token.text() == "\t"
+                                      ? std::string(8, ' ')
+                                      : token.token.text();
+
+            utils::draw_text(text.data(), {x, y}, token.color,
                              constants::font_size, 0);
 
-            x += token.token.text().size() * char_size.x;
+            x += text.size() * char_size.x;
         }
 
         if (m_mode == EditorMode::Visual) {
