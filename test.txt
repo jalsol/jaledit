@@ -1,3 +1,6 @@
-just a little editor
-just a little editor
-just a little editor
+#include <iostream>
+
+int main() {
+    std::cout << "hi\n";
+    return 0;
+}

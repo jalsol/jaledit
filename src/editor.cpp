@@ -1,6 +1,7 @@
 #include "editor.hpp"
 
 #include "constants.hpp"
+#include "highlight/highlight.hpp"
 #include "keybind/keybind.hpp"
 #include "raylib.h"
 #include "utils.hpp"
@@ -215,11 +216,28 @@ void Editor::render() {
 
         std::string line = content.substr(render_line_start, render_line_len);
 
-        const char* line_text = TextFormat("%-*d%s", header_width + 1,
-                                           cur_line_idx + 1, line.c_str());
+        const char* line_number
+            = TextFormat("%-*d", header_width + 1, cur_line_idx + 1);
 
-        utils::draw_text(line_text, {constants::margin, y}, BLACK,
+        utils::draw_text(line_number, {constants::margin, y}, BLACK,
                          constants::font_size, 0);
+
+        float x = constants::margin + (header_width + 1) * char_size.x;
+        Highlighter highlighter(line);
+        HighlightedToken token;
+
+        while (true) {
+            token = highlighter.next();
+
+            if (token.token.kind() == TokenKind::End) {
+                break;
+            }
+
+            utils::draw_text(token.token.text().data(), {x, y}, token.color,
+                             constants::font_size, 0);
+
+            x += token.token.text().size() * char_size.x;
+        }
 
         if (m_mode == EditorMode::Visual) {
             const auto& select_start = current_buffer().select_start();

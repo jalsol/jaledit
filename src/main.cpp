@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     while (!WindowShouldClose()) {
         BeginDrawing();
 
-        ClearBackground(RAYWHITE);
+        ClearBackground({239, 241, 245, 255});
         editor.render();
 
         EndDrawing();
