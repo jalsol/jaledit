@@ -59,6 +59,8 @@ public:
 
     std::string_view filename() const;
 
+    bool dirty() const;
+
     void cursor_move_line(int delta);
     void cursor_move_column(int delta, bool move_on_eol);
     void cursor_move_next_char();
@@ -75,6 +77,7 @@ public:
     void copy_range(std::size_t start, std::size_t end);
     void undo();
     void redo();
+    void save();
 
 private:
     // The value of 32 is small enough for demo purposes,
@@ -94,4 +97,6 @@ private:
     Cursor m_select_orig{-1, -1};
 
     std::string_view m_filename{};
+
+    bool m_dirty{};
 };

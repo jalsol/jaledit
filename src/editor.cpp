@@ -132,6 +132,7 @@ Editor::Editor() {
         current_buffer().cursor_move_next_word();
         current_buffer().erase_selected();
     });
+    m_keybinds.insert("W", [this] { current_buffer().save(); });
 
     // TODO:
     // - implement search
@@ -176,18 +177,22 @@ void Editor::render() {
                      constants::font_size, 0);
 
     // draw filename
-
     std::string_view filename = current_buffer().filename();
     if (filename.empty()) {
         filename = "new file";
     }
 
-    utils::draw_text(
-        filename.data(),
-        {GetScreenWidth() - constants::margin
-             - utils::measure_text(filename.data(), constants::font_size, 0).x,
-         0},
-        BLACK, constants::font_size, 0);
+    float filename_width
+        = utils::measure_text(filename.data(), constants::font_size, 0).x;
+
+    utils::draw_text(filename.data(),
+                     {GetScreenWidth() - constants::margin - filename_width, 0},
+                     BLACK, constants::font_size, 0);
+
+    if (current_buffer().dirty()) {
+        utils::draw_text("*", {(float)GetScreenWidth() - constants::margin, 0},
+                         BLACK, constants::font_size, 0);
+    }
 
     // draw status background
     DrawRectangle(0, 0, GetScreenWidth(), constants::margin,
