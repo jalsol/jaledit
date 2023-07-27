@@ -1,6 +1,7 @@
 #include "buffer.hpp"
 
 #include "constants.hpp"
+#include "cursor.hpp"
 #include "raylib.h"
 #include "rope/utils.hpp"
 #include "utils.hpp"
@@ -10,8 +11,10 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <string_view>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 #include <fcntl.h>
@@ -104,6 +107,8 @@ void Buffer::set_cursor(Cursor cursor) {
     }
 }
 
+Rope& Buffer::rope() { return m_rope; }
+
 const Rope& Buffer::rope() const { return m_rope; }
 
 View& Buffer::view() { return m_view; }
@@ -121,6 +126,10 @@ const Cursor& Buffer::select_start() const {
 const Cursor& Buffer::select_end() const {
     return m_cursor > m_select_orig ? m_cursor : m_select_orig;
 }
+
+Suggester& Buffer::suggester() { return m_suggester; }
+
+const Suggester& Buffer::suggester() const { return m_suggester; }
 
 std::string_view Buffer::filename() const { return m_filename; }
 
@@ -254,8 +263,6 @@ void Buffer::cursor_move_prev_word() {
 
 void Buffer::insert_at_cursor(const std::string& text) {
     std::size_t pos = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
-    m_undo.emplace_back(m_rope, m_cursor);
-    m_redo.clear();
     m_rope = m_rope.insert(pos, text);
     m_dirty = true;
 
@@ -266,8 +273,6 @@ void Buffer::insert_at_cursor(const std::string& text) {
 
 void Buffer::append_at_cursor(const std::string& text) {
     std::size_t pos = m_rope.index_from_pos(m_cursor.line, m_cursor.column);
-    m_undo.emplace_back(m_rope, m_cursor);
-    m_redo.clear();
     m_rope = m_rope.insert(pos + 1, text);
     m_dirty = true;
 
@@ -331,6 +336,11 @@ void Buffer::copy_range(std::size_t start, std::size_t end) {
     SetClipboardText(m_rope.substr(start, end - start).c_str());
 }
 
+void Buffer::save_snapshot() {
+    m_undo.emplace_back(m_rope, m_cursor);
+    m_redo.clear();
+}
+
 void Buffer::undo() {
     if (m_undo.empty()) {
         return;
@@ -342,6 +352,14 @@ void Buffer::undo() {
     set_cursor(prev_cursor);
     m_undo.pop_back();
     m_dirty = true;
+}
+
+std::optional<Rope> Buffer::undo_top() {
+    if (m_undo.empty()) {
+        return {};
+    }
+
+    return m_undo.back().first;
 }
 
 void Buffer::redo() {

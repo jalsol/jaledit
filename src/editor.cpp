@@ -46,18 +46,18 @@ Editor::Editor() {
         set_mode(EditorMode::Visual);
     });
     m_keybinds.insert("o", [this] {
+        set_mode(EditorMode::Insert);
         current_buffer().cursor_move_column(constants::max_line_length,
                                             m_mode == EditorMode::Visual);
         current_buffer().append_at_cursor("\n");
         current_buffer().cursor_move_line(1);
-        set_mode(EditorMode::Insert);
     });
     m_keybinds.insert("O", [this] {
+        set_mode(EditorMode::Insert);
         current_buffer().cursor_move_column(-constants::max_line_length,
                                             m_mode == EditorMode::Visual);
         current_buffer().insert_at_cursor("\n");
         current_buffer().cursor_move_line(-1);
-        set_mode(EditorMode::Insert);
     });
     m_keybinds.insert("a", [this] {
         current_buffer().cursor_move_next_char();
@@ -294,7 +294,7 @@ void Editor::render() {
     }
 
     // draw cursorline
-    const int cursor_y
+    const float cursor_y
         = constants::margin + (cursor.line - view.offset_line()) * line_height;
 
     // draw block cursor
@@ -318,6 +318,8 @@ void Editor::render() {
             }
         }
     }
+
+    current_buffer().suggester().render({cursor_x, cursor_y + line_height});
 }
 
 int shift(int key) {
@@ -356,11 +358,11 @@ Key modify_key(int key, int prev_key) {
 
     case KEY_LEFT_CONTROL:
     case KEY_RIGHT_CONTROL:
-        return {KEY_LEFT_CONTROL, key};
+        return {KEY_LEFT_CONTROL, std::tolower(key)};
 
     case KEY_LEFT_ALT:
     case KEY_RIGHT_ALT:
-        return {KEY_LEFT_ALT, key};
+        return {KEY_LEFT_ALT, std::tolower(key)};
 
     default:
         return {KEY_NULL, std::tolower(key)};
@@ -418,7 +420,13 @@ Buffer& Editor::current_buffer() { return m_buffers[m_buffer_id]; }
 
 const Buffer& Editor::current_buffer() const { return m_buffers[m_buffer_id]; }
 
-void Editor::set_mode(EditorMode mode) { m_mode = mode; }
+void Editor::set_mode(EditorMode mode) {
+    m_mode = mode;
+
+    if (m_mode == EditorMode::Insert) {
+        current_buffer().save_snapshot();
+    }
+}
 
 void Editor::reset_to_normal_mode() {
     const auto& cursor = current_buffer().cursor();
@@ -445,25 +453,81 @@ void Editor::normal_mode(Key key) {
 void Editor::insert_mode(Key key) {
     if (key.key == KEY_ESCAPE) {
         reset_to_normal_mode();
+        current_buffer().suggester().to_render(false);
         return;
     }
 
     if (key.key == KEY_BACKSPACE) {
         current_buffer().erase_at_cursor();
+        current_buffer().suggester().to_render(false);
         return;
     }
 
     if (key.key == KEY_TAB) {
         current_buffer().insert_at_cursor(std::string(4, ' '));
+        current_buffer().suggester().to_render(false);
         return;
     }
 
-    current_buffer().insert_at_cursor(std::string{char(key.key)});
+    if (key.modifier == KEY_LEFT_CONTROL) {
+        auto& buffer = current_buffer();
+        auto& cursor = buffer.cursor();
+        auto old_cursor = cursor;
+        const auto& rope = buffer.rope();
 
-    Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
+        std::size_t end = rope.index_from_pos(cursor.line, cursor.column);
+        buffer.cursor_move_prev_word();
+        std::size_t start = rope.index_from_pos(cursor.line, cursor.column);
+        cursor = old_cursor;
+
+        std::string cur_word = rope.substr(start, end - start);
+
+        auto& suggester = buffer.suggester();
+
+        if (suggester.should_update()) {
+            auto opt_undo_top = buffer.undo_top();
+            if (opt_undo_top) {
+                suggester.load_text(*opt_undo_top);
+            } else {
+                suggester.load_text("");
+            }
+        }
+
+        suggester.set_pattern(cur_word);
+
+        switch (key.key) {
+        case 'n':
+            suggester.move_next();
+            return;
+        case 'p':
+            suggester.move_prev();
+            return;
+        }
+    }
+
+    const Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
     const auto& view = current_buffer().view();
 
     if (key.key == '\n') {
+        if (current_buffer().suggester().rendering()) {
+            auto& buffer = current_buffer();
+            auto& cursor = buffer.cursor();
+            auto& rope = buffer.rope();
+
+            std::size_t end = rope.index_from_pos(cursor.line, cursor.column);
+            buffer.cursor_move_prev_word();
+            std::size_t start = rope.index_from_pos(cursor.line, cursor.column);
+
+            auto& suggester = buffer.suggester();
+
+            rope = rope.erase(start, end - start);
+            buffer.insert_at_cursor(suggester.select());
+            std::cout << suggester.select() << '\n';
+
+            suggester.to_render(false);
+            return;
+        }
+
         if (current_buffer().cursor().line
             >= view.offset_line() + view.lines(char_size)) {
             current_buffer().cursor_move_line(1);
@@ -472,6 +536,10 @@ void Editor::insert_mode(Key key) {
         }
         current_buffer().cursor_move_column(-constants::max_line_length, false);
     }
+
+    current_buffer().insert_at_cursor(std::string{char(key.key)});
+    current_buffer().suggester().mark_update();
+    current_buffer().suggester().to_render(false);
 }
 
 void Editor::visual_mode(Key key) {

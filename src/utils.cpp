@@ -30,4 +30,8 @@ void unreachable() {
 #endif
 }
 
+bool is_symbol_start(char x) { return std::isalpha(x) || x == '_'; }
+
+bool is_symbol(char x) { return std::isalnum(x) || x == '_'; }
+
 } // namespace utils
