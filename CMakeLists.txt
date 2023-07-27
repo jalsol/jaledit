@@ -52,6 +52,8 @@ add_executable(${PROJECT_NAME}
     src/highlight/token.cpp
     src/highlight/highlight.cpp
 
+    src/autocomplete/suggester.cpp
+
     src/buffer.cpp
     src/editor.cpp
 )

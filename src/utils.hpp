@@ -30,4 +30,8 @@ bool is_vim_alnum(int c);
 
 void unreachable();
 
+bool is_symbol_start(char x);
+
+bool is_symbol(char x);
+
 } // namespace utils

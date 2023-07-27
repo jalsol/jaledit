@@ -1,6 +1,7 @@
 #include "highlight/lexer.hpp"
 
 #include "highlight/token.hpp"
+#include "utils.hpp"
 
 #include <array>
 #include <cctype>
@@ -148,10 +149,6 @@ void Lexer::trim_left() {
     }
 }
 
-bool is_symbol_start(char x) { return std::isalpha(x) || x == '_'; }
-
-bool is_symbol(char x) { return std::isalnum(x) || x == '_'; }
-
 Token Lexer::next() {
     Token token;
     token.set_text(m_text.substr(m_pos)).set_kind(TokenKind::End);
@@ -231,10 +228,10 @@ Token Lexer::next() {
         }
     }
 
-    if (is_symbol_start(m_text[m_pos])) {
+    if (utils::is_symbol_start(m_text[m_pos])) {
         token.set_kind(TokenKind::Symbol);
 
-        while (m_pos < m_text.size() && is_symbol(m_text[m_pos])) {
+        while (m_pos < m_text.size() && utils::is_symbol(m_text[m_pos])) {
             skip(1);
         }
 
@@ -268,7 +265,7 @@ Token Lexer::next() {
     } else if (std::isdigit(m_text[m_pos])) {
         token.set_kind(TokenKind::Number);
 
-        while (m_pos < m_text.size() && is_symbol(m_text[m_pos])) {
+        while (m_pos < m_text.size() && utils::is_symbol(m_text[m_pos])) {
             skip(1);
         }
 

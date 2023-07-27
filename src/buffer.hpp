@@ -1,21 +1,17 @@
 #pragma once
 
+#include "autocomplete/suggester.hpp"
+#include "cursor.hpp"
 #include "rope/rope.hpp"
 
 #include "raylib.h"
 
 #include <cstddef>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
 #include <vector>
-
-struct Cursor {
-    int line{};
-    int column{};
-
-    auto operator<=>(const Cursor&) const = default;
-};
 
 class View {
 public:
@@ -47,6 +43,7 @@ public:
     const Cursor& cursor() const;
     void set_cursor(Cursor cursor);
 
+    Rope& rope();
     const Rope& rope() const;
 
     View& view();
@@ -56,6 +53,9 @@ public:
     const Cursor& select_orig() const;
     const Cursor& select_start() const;
     const Cursor& select_end() const;
+
+    Suggester& suggester();
+    const Suggester& suggester() const;
 
     std::string_view filename() const;
 
@@ -75,8 +75,11 @@ public:
     void erase_range(std::size_t start, std::size_t end);
     void copy_selected();
     void copy_range(std::size_t start, std::size_t end);
+
     void undo();
+    std::optional<Rope> undo_top();
     void redo();
+    void save_snapshot();
     void save();
 
 private:
@@ -98,5 +101,7 @@ private:
 
     std::string_view m_filename{};
 
-    bool m_dirty{};
+    bool m_dirty{true};
+
+    Suggester m_suggester{};
 };
