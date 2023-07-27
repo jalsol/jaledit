@@ -192,7 +192,7 @@ void Editor::render() {
                      {GetScreenWidth() - constants::margin - filename_width, 0},
                      BLACK, constants::font_size, 0);
 
-    if (current_buffer().dirty()) {
+    if (current_buffer().dirty() && current_buffer().undo_top()) {
         utils::draw_text("*", {(float)GetScreenWidth() - constants::margin, 0},
                          BLACK, constants::font_size, 0);
     }
