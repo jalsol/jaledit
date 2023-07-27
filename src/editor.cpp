@@ -50,7 +50,10 @@ Editor::Editor() {
         current_buffer().cursor_move_column(constants::max_line_length,
                                             m_mode == EditorMode::Visual);
         current_buffer().append_at_cursor("\n");
-        current_buffer().cursor_move_line(1);
+        if (current_buffer().rope().line_length(current_buffer().cursor().line)
+            > 0) {
+            current_buffer().cursor_move_line(1);
+        }
     });
     m_keybinds.insert("O", [this] {
         set_mode(EditorMode::Insert);
