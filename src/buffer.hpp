@@ -101,7 +101,7 @@ private:
 
     std::string_view m_filename{};
 
-    bool m_dirty{true};
+    bool m_dirty{};
 
     Suggester m_suggester{};
 };
