@@ -83,13 +83,20 @@ public:
     void save();
 
 private:
+    struct Snapshot {
+        Rope rope;
+        Cursor cursor;
+        bool dirty;
+    };
+
     // The value of 32 is small enough for demo purposes,
     // but in a real editor this value would be much larger.
     // static constexpr std::size_t max_gap_size = 32;
 
     Rope m_rope{};
-    std::vector<std::pair<Rope, Cursor>> m_undo{};
-    std::vector<std::pair<Rope, Cursor>> m_redo{};
+
+    std::vector<Snapshot> m_undo{};
+    std::vector<Snapshot> m_redo{};
 
     // std::string m_gap{};
     // std::size_t m_gap_start{};

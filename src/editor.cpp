@@ -97,6 +97,8 @@ Editor::Editor() {
         auto cursor = buffer.cursor();
         const auto& rope = buffer.rope();
 
+        buffer.save_snapshot();
+
         if (rope[rope.index_from_pos(cursor.line, cursor.column)] == '\n') {
             buffer.insert_at_cursor(GetClipboardText());
             buffer.cursor_move_column(-1, false);
@@ -111,6 +113,8 @@ Editor::Editor() {
         const auto& cursor = buffer.cursor();
         const auto& rope = buffer.rope();
 
+        buffer.save_snapshot();
+
         int line_start = rope.find_line_start(cursor.line);
         int next_line_start = rope.find_line_start(cursor.line + 1);
         current_buffer().select_orig()
@@ -123,6 +127,8 @@ Editor::Editor() {
         const auto& cursor = buffer.cursor();
         const auto& rope = buffer.rope();
 
+        buffer.save_snapshot();
+
         std::size_t line_start = rope.find_line_start(cursor.line);
         std::size_t line_end = rope.find_line_start(cursor.line + 1) - 1;
         current_buffer().copy_range(line_start, line_end);
@@ -131,9 +137,23 @@ Editor::Editor() {
         auto& buffer = current_buffer();
         auto cursor = buffer.cursor();
 
+        buffer.save_snapshot();
+
         current_buffer().select_orig() = cursor;
         current_buffer().cursor_move_next_word();
         current_buffer().erase_selected();
+    });
+    m_keybinds.insert("cw", [this] {
+        auto& buffer = current_buffer();
+        auto cursor = buffer.cursor();
+
+        buffer.save_snapshot();
+
+        current_buffer().select_orig() = cursor;
+        current_buffer().cursor_move_next_word();
+        current_buffer().erase_selected();
+
+        set_mode(EditorMode::Insert);
     });
     m_keybinds.insert("W", [this] { current_buffer().save(); });
 
@@ -192,7 +212,7 @@ void Editor::render() {
                      {GetScreenWidth() - constants::margin - filename_width, 0},
                      BLACK, constants::font_size, 0);
 
-    if (current_buffer().dirty() && current_buffer().undo_top()) {
+    if (current_buffer().dirty()) {
         utils::draw_text("*", {(float)GetScreenWidth() - constants::margin, 0},
                          BLACK, constants::font_size, 0);
     }
@@ -562,6 +582,7 @@ void Editor::visual_mode(Key key) {
             return;
         case 'y':
             current_buffer().copy_selected();
+            reset_to_normal_mode();
             return;
         default:
             break;

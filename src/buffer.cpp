@@ -74,6 +74,11 @@ Buffer::Buffer(std::string_view filename) : m_filename{filename} {
         throw std::runtime_error{"Could not get file size"};
     }
 
+    if (sb.st_size == 0) {
+        m_rope = Rope{"\n"};
+        return;
+    }
+
     char* file_in_memory = static_cast<char*>(
         mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
     std::size_t remaining = sb.st_size;
@@ -337,7 +342,7 @@ void Buffer::copy_range(std::size_t start, std::size_t end) {
 }
 
 void Buffer::save_snapshot() {
-    m_undo.emplace_back(m_rope, m_cursor);
+    m_undo.push_back({m_rope, m_cursor, m_dirty});
     m_redo.clear();
 }
 
@@ -346,12 +351,13 @@ void Buffer::undo() {
         return;
     }
 
-    m_redo.emplace_back(m_rope, m_cursor);
-    const auto& [prev_rope, prev_cursor] = m_undo.back();
+    m_redo.push_back({m_rope, m_cursor, m_dirty});
+    const auto& [prev_rope, prev_cursor, prev_dirty] = m_undo.back();
     m_rope = std::move(prev_rope);
     set_cursor(prev_cursor);
+    m_dirty = prev_dirty;
+
     m_undo.pop_back();
-    m_dirty = true;
 }
 
 std::optional<Rope> Buffer::undo_top() {
@@ -359,7 +365,7 @@ std::optional<Rope> Buffer::undo_top() {
         return {};
     }
 
-    return m_undo.back().first;
+    return m_undo.back().rope;
 }
 
 void Buffer::redo() {
@@ -367,16 +373,21 @@ void Buffer::redo() {
         return;
     }
 
-    m_undo.emplace_back(m_rope, m_cursor);
-    const auto& [next_rope, next_cursor] = m_redo.back();
+    m_undo.push_back(m_redo.back());
+    const auto& [next_rope, next_cursor, next_dirty] = m_redo.back();
     m_rope = std::move(next_rope);
     set_cursor(next_cursor);
+    m_dirty = next_dirty;
+
     m_redo.pop_back();
-    m_dirty = true;
 }
 
 void Buffer::save() {
     if (m_filename.empty()) {
+        return;
+    }
+
+    if (!m_dirty) {
         return;
     }
 
