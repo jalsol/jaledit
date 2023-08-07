@@ -30,9 +30,12 @@ if (NOT raylib_FOUND) # If there's none, fetch and build raylib
     endif()
 endif()
 
+add_subdirectory(external/nativefiledialog-extended)
+
 ###############################################################################
 
 include_directories(src)
+include_directories(external/nativefiledialog-extended/src/include)
 
 add_executable(${PROJECT_NAME}
     src/main.cpp
@@ -70,6 +73,6 @@ add_executable(test_rope
 
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
 
-target_link_libraries(${PROJECT_NAME} raylib)
+target_link_libraries(${PROJECT_NAME} PRIVATE raylib nfd)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC external)
