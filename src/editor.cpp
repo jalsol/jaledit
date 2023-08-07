@@ -219,7 +219,9 @@ Editor::Editor() {
         },
         true);
     m_keybinds.insert(
-        "W", [this] { current_buffer().save(); }, true);
+        "s", [this] { current_buffer().save(); }, true);
+    m_keybinds.insert(
+        "S", [this] { current_buffer().save_as(); }, true);
     m_keybinds.insert(
         "F", [this] { open_file_dialog(); }, false);
     m_keybinds.insert(
@@ -733,6 +735,14 @@ void Editor::buffer_list_mode(Key key) {
             reset_to_normal_mode();
             set_mode(EditorMode::BufferList);
             return;
+        case 'n':
+            // create new buffer
+            m_buffers.insert(m_buffers.begin() + m_prev_buffer_id + 1,
+                             Buffer{});
+            m_prev_buffer_id++;
+            std::cerr << "Created new buffer " << m_prev_buffer_id << std::endl;
+            reset_to_normal_mode();
+            set_mode(EditorMode::BufferList);
         default:
             break;
         }

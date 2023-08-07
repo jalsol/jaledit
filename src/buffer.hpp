@@ -82,6 +82,7 @@ public:
     void redo();
     void save_snapshot();
     void save();
+    void save_as();
 
 private:
     struct Snapshot {

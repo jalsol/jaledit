@@ -2,6 +2,7 @@
 
 #include "constants.hpp"
 #include "cursor.hpp"
+#include "nfd.hpp"
 #include "raylib.h"
 #include "rope/utils.hpp"
 #include "utils.hpp"
@@ -385,7 +386,8 @@ void Buffer::redo() {
 }
 
 void Buffer::save() {
-    if (m_filename.empty()) {
+    if (m_filename == "new file") {
+        save_as();
         return;
     }
 
@@ -442,4 +444,22 @@ void Buffer::save() {
     close(fd);
     std::cerr << "Saved " << m_filename << "\n";
     m_dirty = false;
+}
+
+void Buffer::save_as() {
+    NFD::Guard nfd_guard;
+    NFD::UniquePath out_path;
+
+    nfdresult_t result
+        = NFD::SaveDialog(out_path, nullptr, 0, GetWorkingDirectory());
+
+    if (result != NFD_OKAY) {
+        return;
+    }
+
+    m_filename = out_path.get();
+    m_dirty = true;
+
+    std::cerr << "Saving as " << m_filename << "\n";
+    save();
 }
