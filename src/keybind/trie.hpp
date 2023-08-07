@@ -11,9 +11,9 @@ public:
     ~Keybind();
 
     template<std::invocable Func>
-    void insert(std::string_view keyseq, Func func);
+    void insert(std::string_view keyseq, Func func, bool editable);
 
-    void step(char c);
+    void step(char c, bool editable);
     void reset_step();
 
 private:

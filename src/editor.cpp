@@ -3,6 +3,7 @@
 #include "constants.hpp"
 #include "highlight/highlight.hpp"
 #include "keybind/keybind.hpp"
+#include "nfd.hpp"
 #include "raylib.h"
 #include "utils.hpp"
 
@@ -12,150 +13,217 @@
 #include <string_view>
 
 Editor::Editor() {
-    m_keybinds.insert("h", [this] {
-        current_buffer().cursor_move_column(-1, m_mode == EditorMode::Visual);
-    });
-    m_keybinds.insert("j", [this] { current_buffer().cursor_move_line(1); });
-    m_keybinds.insert("k", [this] { current_buffer().cursor_move_line(-1); });
-    m_keybinds.insert("l", [this] {
-        current_buffer().cursor_move_column(1, m_mode == EditorMode::Visual);
-    });
-    m_keybinds.insert("gg", [this] {
-        current_buffer().cursor_move_line(
-            -current_buffer().rope().line_count());
-    });
-    m_keybinds.insert("G", [this] {
-        current_buffer().cursor_move_line(current_buffer().rope().line_count());
-    });
-    m_keybinds.insert("0", [this] {
-        current_buffer().cursor_move_column(-constants::max_line_length,
-                                            m_mode == EditorMode::Visual);
-    });
-    m_keybinds.insert("$", [this] {
-        current_buffer().cursor_move_column(constants::max_line_length,
-                                            m_mode == EditorMode::Visual);
-    });
-    m_keybinds.insert("w",
-                      [this] { current_buffer().cursor_move_next_word(); });
-    m_keybinds.insert("b",
-                      [this] { current_buffer().cursor_move_prev_word(); });
+    m_keybinds.insert(
+        "h",
+        [this] {
+            current_buffer().cursor_move_column(-1,
+                                                m_mode == EditorMode::Visual);
+        },
+        false);
+    m_keybinds.insert(
+        "j", [this] { current_buffer().cursor_move_line(1); }, false);
+    m_keybinds.insert(
+        "k", [this] { current_buffer().cursor_move_line(-1); }, false);
+    m_keybinds.insert(
+        "l",
+        [this] {
+            current_buffer().cursor_move_column(1,
+                                                m_mode == EditorMode::Visual);
+        },
+        false);
+    m_keybinds.insert(
+        "gg",
+        [this] {
+            current_buffer().cursor_move_line(
+                -current_buffer().rope().line_count());
+        },
+        false);
+    m_keybinds.insert(
+        "G",
+        [this] {
+            current_buffer().cursor_move_line(
+                current_buffer().rope().line_count());
+        },
+        false);
+    m_keybinds.insert(
+        "0",
+        [this] {
+            current_buffer().cursor_move_column(-constants::max_line_length,
+                                                m_mode == EditorMode::Visual);
+        },
+        false);
+    m_keybinds.insert(
+        "$",
+        [this] {
+            current_buffer().cursor_move_column(constants::max_line_length,
+                                                m_mode == EditorMode::Visual);
+        },
+        false);
+    m_keybinds.insert(
+        "w", [this] { current_buffer().cursor_move_next_word(); }, false);
+    m_keybinds.insert(
+        "b", [this] { current_buffer().cursor_move_prev_word(); }, false);
 
-    m_keybinds.insert("i", [this] { set_mode(EditorMode::Insert); });
-    m_keybinds.insert("v", [this] {
-        current_buffer().select_orig() = current_buffer().cursor();
-        set_mode(EditorMode::Visual);
-    });
-    m_keybinds.insert("o", [this] {
-        set_mode(EditorMode::Insert);
-        current_buffer().cursor_move_column(constants::max_line_length,
-                                            m_mode == EditorMode::Visual);
-        current_buffer().append_at_cursor("\n");
-        if (current_buffer().rope().line_length(current_buffer().cursor().line)
-            > 0) {
-            current_buffer().cursor_move_line(1);
-        }
-    });
-    m_keybinds.insert("O", [this] {
-        set_mode(EditorMode::Insert);
-        current_buffer().cursor_move_column(-constants::max_line_length,
-                                            m_mode == EditorMode::Visual);
-        current_buffer().insert_at_cursor("\n");
-        current_buffer().cursor_move_line(-1);
-    });
-    m_keybinds.insert("a", [this] {
-        current_buffer().cursor_move_next_char();
-        set_mode(EditorMode::Insert);
-    });
-    m_keybinds.insert("A", [this] {
-        current_buffer().cursor_move_column(constants::max_line_length,
-                                            m_mode == EditorMode::Visual);
-        current_buffer().cursor_move_next_char();
-        set_mode(EditorMode::Insert);
-    });
-    m_keybinds.insert("u", [this] { current_buffer().undo(); });
-    m_keybinds.insert("r", [this] { current_buffer().redo(); });
-    m_keybinds.insert("x", [this] {
-        auto& buffer = current_buffer();
-        const auto& cursor = buffer.cursor();
-        const auto& rope = buffer.rope();
+    m_keybinds.insert(
+        "i", [this] { set_mode(EditorMode::Insert); }, true);
+    m_keybinds.insert(
+        "v",
+        [this] {
+            current_buffer().select_orig() = current_buffer().cursor();
+            set_mode(EditorMode::Visual);
+        },
+        false);
+    m_keybinds.insert(
+        "o",
+        [this] {
+            set_mode(EditorMode::Insert);
+            current_buffer().cursor_move_column(constants::max_line_length,
+                                                m_mode == EditorMode::Visual);
+            current_buffer().append_at_cursor("\n");
+            if (current_buffer().rope().line_length(
+                    current_buffer().cursor().line)
+                > 0) {
+                current_buffer().cursor_move_line(1);
+            }
+        },
+        true);
+    m_keybinds.insert(
+        "O",
+        [this] {
+            set_mode(EditorMode::Insert);
+            current_buffer().cursor_move_column(-constants::max_line_length,
+                                                m_mode == EditorMode::Visual);
+            current_buffer().insert_at_cursor("\n");
+            current_buffer().cursor_move_line(-1);
+        },
+        true);
+    m_keybinds.insert(
+        "a",
+        [this] {
+            current_buffer().cursor_move_next_char();
+            set_mode(EditorMode::Insert);
+        },
+        true);
+    m_keybinds.insert(
+        "A",
+        [this] {
+            current_buffer().cursor_move_column(constants::max_line_length,
+                                                m_mode == EditorMode::Visual);
+            current_buffer().cursor_move_next_char();
+            set_mode(EditorMode::Insert);
+        },
+        true);
+    m_keybinds.insert(
+        "u", [this] { current_buffer().undo(); }, true);
+    m_keybinds.insert(
+        "r", [this] { current_buffer().redo(); }, true);
+    m_keybinds.insert(
+        "x",
+        [this] {
+            auto& buffer = current_buffer();
+            const auto& cursor = buffer.cursor();
+            const auto& rope = buffer.rope();
 
-        char cur_char = rope[rope.index_from_pos(cursor.line, cursor.column)];
-        if (cur_char == '\n' || cur_char == '\0') {
-            return;
-        }
+            char cur_char
+                = rope[rope.index_from_pos(cursor.line, cursor.column)];
+            if (cur_char == '\n' || cur_char == '\0') {
+                return;
+            }
 
-        buffer.cursor_move_next_char();
-        buffer.erase_at_cursor();
+            buffer.cursor_move_next_char();
+            buffer.erase_at_cursor();
 
-        cur_char = rope[rope.index_from_pos(cursor.line, cursor.column)];
-        if ((cur_char == '\n' || cur_char == '\0') && cursor.column > 0) {
-            buffer.cursor_move_prev_char();
-        }
-    });
-    m_keybinds.insert("p", [this] {
-        auto& buffer = current_buffer();
-        auto cursor = buffer.cursor();
-        const auto& rope = buffer.rope();
+            cur_char = rope[rope.index_from_pos(cursor.line, cursor.column)];
+            if ((cur_char == '\n' || cur_char == '\0') && cursor.column > 0) {
+                buffer.cursor_move_prev_char();
+            }
+        },
+        true);
+    m_keybinds.insert(
+        "p",
+        [this] {
+            auto& buffer = current_buffer();
+            auto cursor = buffer.cursor();
+            const auto& rope = buffer.rope();
 
-        buffer.save_snapshot();
+            buffer.save_snapshot();
 
-        if (rope[rope.index_from_pos(cursor.line, cursor.column)] == '\n') {
-            buffer.insert_at_cursor(GetClipboardText());
-            buffer.cursor_move_column(-1, false);
-        } else {
-            buffer.append_at_cursor(GetClipboardText());
-        }
+            if (rope[rope.index_from_pos(cursor.line, cursor.column)] == '\n') {
+                buffer.insert_at_cursor(GetClipboardText());
+                buffer.cursor_move_column(-1, false);
+            } else {
+                buffer.append_at_cursor(GetClipboardText());
+            }
 
-        buffer.set_cursor(cursor);
-    });
-    m_keybinds.insert("dd", [this] {
-        auto& buffer = current_buffer();
-        const auto& cursor = buffer.cursor();
-        const auto& rope = buffer.rope();
+            buffer.set_cursor(cursor);
+        },
+        true);
+    m_keybinds.insert(
+        "dd",
+        [this] {
+            auto& buffer = current_buffer();
+            const auto& cursor = buffer.cursor();
+            const auto& rope = buffer.rope();
 
-        buffer.save_snapshot();
+            buffer.save_snapshot();
 
-        int line_start = rope.find_line_start(cursor.line);
-        int next_line_start = rope.find_line_start(cursor.line + 1);
-        current_buffer().select_orig()
-            = {cursor.line, next_line_start - line_start};
-        current_buffer().cursor_move_column(-constants::max_line_length, false);
-        current_buffer().erase_range(line_start, next_line_start);
-    });
-    m_keybinds.insert("yy", [this] {
-        auto& buffer = current_buffer();
-        const auto& cursor = buffer.cursor();
-        const auto& rope = buffer.rope();
+            int line_start = rope.find_line_start(cursor.line);
+            int next_line_start = rope.find_line_start(cursor.line + 1);
+            current_buffer().select_orig()
+                = {cursor.line, next_line_start - line_start};
+            current_buffer().cursor_move_column(-constants::max_line_length,
+                                                false);
+            current_buffer().erase_range(line_start, next_line_start);
+        },
+        true);
+    m_keybinds.insert(
+        "yy",
+        [this] {
+            auto& buffer = current_buffer();
+            const auto& cursor = buffer.cursor();
+            const auto& rope = buffer.rope();
 
-        buffer.save_snapshot();
+            buffer.save_snapshot();
 
-        std::size_t line_start = rope.find_line_start(cursor.line);
-        std::size_t line_end = rope.find_line_start(cursor.line + 1) - 1;
-        current_buffer().copy_range(line_start, line_end);
-    });
-    m_keybinds.insert("dw", [this] {
-        auto& buffer = current_buffer();
-        auto cursor = buffer.cursor();
+            std::size_t line_start = rope.find_line_start(cursor.line);
+            std::size_t line_end = rope.find_line_start(cursor.line + 1) - 1;
+            current_buffer().copy_range(line_start, line_end);
+        },
+        true);
+    m_keybinds.insert(
+        "dw",
+        [this] {
+            auto& buffer = current_buffer();
+            auto cursor = buffer.cursor();
 
-        buffer.save_snapshot();
+            buffer.save_snapshot();
 
-        current_buffer().select_orig() = cursor;
-        current_buffer().cursor_move_next_word();
-        current_buffer().erase_selected();
-    });
-    m_keybinds.insert("cw", [this] {
-        auto& buffer = current_buffer();
-        auto cursor = buffer.cursor();
+            current_buffer().select_orig() = cursor;
+            current_buffer().cursor_move_next_word();
+            current_buffer().erase_selected();
+        },
+        true);
+    m_keybinds.insert(
+        "cw",
+        [this] {
+            auto& buffer = current_buffer();
+            auto cursor = buffer.cursor();
 
-        buffer.save_snapshot();
+            buffer.save_snapshot();
 
-        current_buffer().select_orig() = cursor;
-        current_buffer().cursor_move_next_word();
-        current_buffer().erase_selected();
+            current_buffer().select_orig() = cursor;
+            current_buffer().cursor_move_next_word();
+            current_buffer().erase_selected();
 
-        set_mode(EditorMode::Insert);
-    });
-    m_keybinds.insert("W", [this] { current_buffer().save(); });
+            set_mode(EditorMode::Insert);
+        },
+        true);
+    m_keybinds.insert(
+        "W", [this] { current_buffer().save(); }, true);
+    m_keybinds.insert(
+        "F", [this] { open_file_dialog(); }, false);
+    m_keybinds.insert(
+        "f", [this] { set_mode(EditorMode::BufferList); }, false);
 
     // TODO:
     // - implement search
@@ -164,21 +232,7 @@ Editor::Editor() {
 
 Editor::Editor(std::string_view filename) : Editor{} { open(filename); }
 
-void Editor::render() {
-    Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
-    const int line_height = constants::font_size + constants::line_spacing;
-    const std::size_t line_width = char_size.x;
-
-    const auto& cursor = current_buffer().cursor();
-    const auto& content = current_buffer().rope();
-    auto& view = current_buffer().view();
-
-    const int max_line_number_size = utils::number_len(content.line_count());
-    const int offset_from_number = 2;
-    const int header_width = max_line_number_size + offset_from_number;
-
-    view.update_header_size(header_width);
-
+void Editor::render_status_bar() {
     // draw status
     std::string_view status;
 
@@ -192,6 +246,9 @@ void Editor::render() {
     case EditorMode::Visual:
         status = "VISUAL";
         break;
+    case EditorMode::BufferList:
+        status = "BUFFER LIST";
+        break;
     default:
         utils::unreachable();
     }
@@ -200,26 +257,42 @@ void Editor::render() {
                      constants::font_size, 0);
 
     // draw filename
-    std::string_view filename = current_buffer().filename();
-    if (filename.empty()) {
-        filename = "new file";
+    if (m_mode != EditorMode::BufferList) {
+        std::string_view filename = current_buffer().filename();
+
+        float filename_width
+            = utils::measure_text(filename.data(), constants::font_size, 0).x;
+
+        utils::draw_text(
+            filename.data(),
+            {GetScreenWidth() - constants::margin - filename_width, 0}, BLACK,
+            constants::font_size, 0);
+
+        if (current_buffer().dirty()) {
+            utils::draw_text("*",
+                             {(float)GetScreenWidth() - constants::margin, 0},
+                             BLACK, constants::font_size, 0);
+        }
     }
-
-    float filename_width
-        = utils::measure_text(filename.data(), constants::font_size, 0).x;
-
-    utils::draw_text(filename.data(),
-                     {GetScreenWidth() - constants::margin - filename_width, 0},
-                     BLACK, constants::font_size, 0);
-
-    if (current_buffer().dirty()) {
-        utils::draw_text("*", {(float)GetScreenWidth() - constants::margin, 0},
-                         BLACK, constants::font_size, 0);
-    }
-
     // draw status background
     DrawRectangle(0, 0, GetScreenWidth(), constants::margin,
                   ColorAlpha(ORANGE, 0.2F));
+}
+
+void Editor::render_buffer() {
+    Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
+    const int line_height = constants::font_size + constants::line_spacing;
+    const std::size_t line_width = char_size.x;
+
+    const auto& cursor = current_buffer().cursor();
+    const auto& content = current_buffer().rope();
+    auto& view = current_buffer().view();
+
+    const int max_line_number_size = utils::number_len(content.line_count());
+    const int offset_from_number = 2;
+    const int header_width = max_line_number_size + offset_from_number;
+
+    view.update_header_size(header_width);
 
     // draw text and line numbers
     float y = constants::margin - line_height;
@@ -333,16 +406,19 @@ void Editor::render() {
                           ColorAlpha(GRAY, 0.15F));
         }
 
-        if (m_mode != EditorMode::Command) {
-            // draw block cursor
-            if (view.viewable_column(cursor.column, char_size)) {
-                DrawRectangle(cursor_x, cursor_y, line_width, line_height,
-                              ColorAlpha(ORANGE, 0.45F));
-            }
+        // draw block cursor
+        if (view.viewable_column(cursor.column, char_size)) {
+            DrawRectangle(cursor_x, cursor_y, line_width, line_height,
+                          ColorAlpha(ORANGE, 0.45F));
         }
     }
 
     current_buffer().suggester().render({cursor_x, cursor_y + line_height});
+}
+
+void Editor::render() {
+    render_status_bar();
+    render_buffer();
 }
 
 int shift(int key) {
@@ -424,6 +500,9 @@ void Editor::update() {
     case EditorMode::Visual:
         visual_mode(rv);
         break;
+    case EditorMode::BufferList:
+        buffer_list_mode(rv);
+        break;
     default:
         utils::unreachable();
     }
@@ -448,6 +527,19 @@ void Editor::set_mode(EditorMode mode) {
 
     if (m_mode == EditorMode::Insert) {
         current_buffer().save_snapshot();
+    } else if (m_mode == EditorMode::BufferList) {
+        Buffer buffer_list;
+        buffer_list.rope() = Rope{};
+        buffer_list.cursor().line = m_buffer_id;
+
+        for (const auto& buffer : m_buffers) {
+            buffer_list.rope()
+                = buffer_list.rope().append(buffer.filename()).append("\n");
+        }
+
+        m_buffers.emplace_back(buffer_list);
+        m_prev_buffer_id = m_buffer_id;
+        m_buffer_id = m_buffers.size() - 1;
     }
 }
 
@@ -462,6 +554,11 @@ void Editor::reset_to_normal_mode() {
         }
     }
 
+    if (m_mode == EditorMode::BufferList) {
+        m_buffer_id = m_prev_buffer_id;
+        m_buffers.pop_back();
+    }
+
     set_mode(EditorMode::Normal);
 }
 
@@ -469,7 +566,7 @@ void Editor::normal_mode(Key key) {
     if (key.modifier != KEY_NULL) {
         m_keybinds.reset_step();
     } else {
-        m_keybinds.step(key.key);
+        m_keybinds.step(key.key, m_mode != EditorMode::BufferList);
     }
 }
 
@@ -592,6 +689,44 @@ void Editor::visual_mode(Key key) {
     normal_mode(key);
 }
 
+void Editor::buffer_list_mode(Key key) {
+    if (key.key == KEY_ESCAPE) {
+        m_buffer_id = m_prev_buffer_id;
+        reset_to_normal_mode();
+        return;
+    }
+
+    if (key.modifier == KEY_NULL) {
+        switch (key.key) {
+        case '\n':
+            m_prev_buffer_id = current_buffer().cursor().line;
+            reset_to_normal_mode();
+            std::cerr << "Switched to buffer " << m_buffer_id << std::endl;
+            return;
+        default:
+            break;
+        }
+    }
+
+    normal_mode(key);
+}
+
 void Editor::undo() { current_buffer().undo(); }
 
 void Editor::redo() { current_buffer().redo(); }
+
+void Editor::open_file_dialog() {
+    NFD::Guard nfdGuard;
+    NFD::UniquePath outPath;
+
+    nfdresult_t result
+        = NFD::OpenDialog(outPath, nullptr, 0, GetWorkingDirectory());
+    if (result == NFD_OKAY) {
+        std::cout << "Opened " << outPath.get() << std::endl;
+        open(outPath.get());
+    } else if (result == NFD_CANCEL) {
+        std::cout << "User pressed cancel." << std::endl;
+    } else {
+        std::cout << "Error: " << NFD::GetError() << std::endl;
+    }
+}

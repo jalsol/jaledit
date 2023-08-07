@@ -136,7 +136,9 @@ Suggester& Buffer::suggester() { return m_suggester; }
 
 const Suggester& Buffer::suggester() const { return m_suggester; }
 
-std::string_view Buffer::filename() const { return m_filename; }
+std::string& Buffer::filename() { return m_filename; }
+
+const std::string& Buffer::filename() const { return m_filename; }
 
 bool Buffer::dirty() const { return m_dirty; }
 

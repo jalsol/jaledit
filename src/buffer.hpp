@@ -57,7 +57,8 @@ public:
     Suggester& suggester();
     const Suggester& suggester() const;
 
-    std::string_view filename() const;
+    std::string& filename();
+    const std::string& filename() const;
 
     bool dirty() const;
 
@@ -106,7 +107,7 @@ private:
 
     Cursor m_select_orig{-1, -1};
 
-    std::string_view m_filename{};
+    std::string m_filename{"new file"};
 
     bool m_dirty{};
 

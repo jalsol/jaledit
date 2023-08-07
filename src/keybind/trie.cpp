@@ -8,7 +8,7 @@ Keybind::Keybind() : m_current{m_root} {}
 
 Keybind::~Keybind() { delete m_root; }
 
-void Keybind::step(char c) {
+void Keybind::step(char c, bool editable) {
     if (!m_current || !m_current->child(c)) {
         reset_step();
         return;
@@ -17,7 +17,7 @@ void Keybind::step(char c) {
     m_current = m_current->child(c);
 
     if (m_current->is_func()) {
-        m_current->call();
+        m_current->call(editable);
         reset_step();
     }
 }
