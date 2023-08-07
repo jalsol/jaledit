@@ -709,6 +709,30 @@ void Editor::buffer_list_mode(Key key) {
             reset_to_normal_mode();
             std::cerr << "Switched to buffer " << m_buffer_id << std::endl;
             return;
+        case 'd':
+            m_prev_buffer_id = current_buffer().cursor().line;
+            if (m_buffers[m_prev_buffer_id].dirty()) {
+                std::cerr << "Buffer " << m_prev_buffer_id
+                          << " is modified. Cannot delete." << std::endl;
+                return;
+            }
+
+            m_buffers.erase(m_buffers.begin() + m_prev_buffer_id);
+            std::cerr << "Deleted buffer " << m_prev_buffer_id << std::endl;
+
+            if (m_buffers.size() == 1) {
+                std::cerr << "No more buffers. Creating new buffer."
+                          << std::endl;
+                m_buffers.insert(m_buffers.begin(), Buffer{});
+            }
+
+            m_prev_buffer_id
+                = std::clamp(0UL, m_prev_buffer_id - 1, m_buffers.size() - 1);
+            std::cerr << "Switched to buffer " << m_prev_buffer_id << std::endl;
+
+            reset_to_normal_mode();
+            set_mode(EditorMode::BufferList);
+            return;
         default:
             break;
         }
