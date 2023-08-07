@@ -523,11 +523,11 @@ Buffer& Editor::current_buffer() { return m_buffers[m_buffer_id]; }
 const Buffer& Editor::current_buffer() const { return m_buffers[m_buffer_id]; }
 
 void Editor::set_mode(EditorMode mode) {
-    m_mode = mode;
-
-    if (m_mode == EditorMode::Insert) {
+    if (mode == EditorMode::Insert) {
         current_buffer().save_snapshot();
-    } else if (m_mode == EditorMode::BufferList) {
+    }
+
+    if (mode == EditorMode::BufferList && m_mode != mode) {
         Buffer buffer_list;
         buffer_list.rope() = Rope{};
         buffer_list.cursor().line = m_buffer_id;
@@ -541,6 +541,8 @@ void Editor::set_mode(EditorMode mode) {
         m_prev_buffer_id = m_buffer_id;
         m_buffer_id = m_buffers.size() - 1;
     }
+
+    m_mode = mode;
 }
 
 void Editor::reset_to_normal_mode() {
@@ -722,8 +724,12 @@ void Editor::open_file_dialog() {
     nfdresult_t result
         = NFD::OpenDialog(outPath, nullptr, 0, GetWorkingDirectory());
     if (result == NFD_OKAY) {
-        std::cout << "Opened " << outPath.get() << std::endl;
+        if (m_mode == EditorMode::BufferList) {
+            m_buffers.pop_back();
+        }
         open(outPath.get());
+        std::cout << "Opened " << outPath.get() << std::endl;
+        set_mode(EditorMode::Normal);
     } else if (result == NFD_CANCEL) {
         std::cout << "User pressed cancel." << std::endl;
     } else {
