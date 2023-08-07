@@ -529,12 +529,16 @@ void Editor::set_mode(EditorMode mode) {
 
     if (mode == EditorMode::BufferList && m_mode != mode) {
         Buffer buffer_list;
-        buffer_list.rope() = Rope{};
+        auto& rope = buffer_list.rope();
+
+        rope = Rope{};
         buffer_list.cursor().line = m_buffer_id;
 
         for (const auto& buffer : m_buffers) {
-            buffer_list.rope()
-                = buffer_list.rope().append(buffer.filename()).append("\n");
+            if (buffer.dirty()) {
+                rope = rope.append("[*] ");
+            }
+            rope = rope.append(buffer.filename()).append("\n");
         }
 
         m_buffers.emplace_back(buffer_list);
