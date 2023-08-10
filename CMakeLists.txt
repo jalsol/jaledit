@@ -57,6 +57,8 @@ add_executable(${PROJECT_NAME}
 
     src/autocomplete/suggester.cpp
 
+    src/finder/finder.cpp
+
     src/buffer.cpp
     src/editor.cpp
 )

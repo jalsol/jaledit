@@ -1,6 +1,7 @@
 #pragma once
 
 #include "buffer.hpp"
+#include "finder/finder.hpp"
 #include "keybind/keybind.hpp"
 
 #include <cstddef>
@@ -12,6 +13,7 @@ enum class EditorMode {
     Insert,
     Visual,
     BufferList,
+    Finder,
 };
 
 struct Key {
@@ -35,6 +37,7 @@ private:
     std::size_t m_prev_buffer_id{};
     EditorMode m_mode{EditorMode::Normal};
     Keybind m_keybinds;
+    Finder m_finder;
 
     Buffer& current_buffer();
     const Buffer& current_buffer() const;
@@ -45,6 +48,7 @@ private:
     void insert_mode(Key key);
     void visual_mode(Key key);
     void buffer_list_mode(Key key);
+    void finder_mode(Key key);
 
     void undo();
     void redo();

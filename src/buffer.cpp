@@ -143,6 +143,8 @@ const std::string& Buffer::filename() const { return m_filename; }
 
 bool Buffer::dirty() const { return m_dirty; }
 
+void Buffer::mark_dirty() { m_dirty = true; }
+
 void Buffer::cursor_move_line(int delta) {
     const Vector2 char_size = utils::measure_text(" ", constants::font_size, 0);
 
@@ -356,7 +358,7 @@ void Buffer::undo() {
 
     m_redo.push_back({m_rope, m_cursor, m_dirty});
     const auto& [prev_rope, prev_cursor, prev_dirty] = m_undo.back();
-    m_rope = std::move(prev_rope);
+    m_rope = prev_rope;
     set_cursor(prev_cursor);
     m_dirty = prev_dirty;
 
@@ -376,9 +378,9 @@ void Buffer::redo() {
         return;
     }
 
-    m_undo.push_back(m_redo.back());
+    m_undo.push_back({m_rope, m_cursor, m_dirty});
     const auto& [next_rope, next_cursor, next_dirty] = m_redo.back();
-    m_rope = std::move(next_rope);
+    m_rope = next_rope;
     set_cursor(next_cursor);
     m_dirty = next_dirty;
 

@@ -61,6 +61,7 @@ public:
     const std::string& filename() const;
 
     bool dirty() const;
+    void mark_dirty();
 
     void cursor_move_line(int delta);
     void cursor_move_column(int delta, bool move_on_eol);
