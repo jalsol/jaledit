@@ -39,7 +39,6 @@ include_directories(external/nativefiledialog-extended/src/include)
 
 add_executable(${PROJECT_NAME}
     src/main.cpp
-    src/raygui_impl.cpp
     src/utils.cpp
 
     src/keybind/node.cpp
