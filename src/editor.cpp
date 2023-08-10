@@ -227,9 +227,36 @@ Editor::Editor() {
     m_keybinds.insert(
         "f", [this] { set_mode(EditorMode::BufferList); }, false);
 
-    // TODO:
-    // - implement search
-    // - implement replace
+    m_keybinds.insert(
+        "/",
+        [this] {
+            set_mode(EditorMode::Finder);
+            m_finder.toggle_prompt(FinderMode::Find);
+        },
+        false);
+    m_keybinds.insert(
+        "?",
+        [this] {
+            set_mode(EditorMode::Finder);
+            m_finder.toggle_prompt(FinderMode::Replace);
+        },
+        false);
+    m_keybinds.insert(
+        "n",
+        [this] {
+            m_finder.set_to_highlight(true);
+            current_buffer().cursor()
+                = m_finder.next_match(current_buffer().cursor());
+        },
+        false);
+    m_keybinds.insert(
+        "N",
+        [this] {
+            m_finder.set_to_highlight(true);
+            current_buffer().cursor()
+                = m_finder.prev_match(current_buffer().cursor());
+        },
+        false);
 }
 
 Editor::Editor(std::string_view filename) : Editor{} { open(filename); }
@@ -250,6 +277,9 @@ void Editor::render_status_bar() {
         break;
     case EditorMode::BufferList:
         status = "BUFFER LIST";
+        break;
+    case EditorMode::Finder:
+        status = "FINDER";
         break;
     default:
         utils::unreachable();
@@ -295,6 +325,14 @@ void Editor::render_buffer() {
     const int header_width = max_line_number_size + offset_from_number;
 
     view.update_header_size(header_width);
+
+    if (!view.viewable_line(cursor.line, char_size)) {
+        view.update_offset_line(cursor.line);
+
+        if (!view.viewable_column(cursor.column, char_size)) {
+            view.update_offset_column(cursor.column);
+        }
+    }
 
     // draw text and line numbers
     float y = constants::margin - line_height;
@@ -415,7 +453,31 @@ void Editor::render_buffer() {
         }
     }
 
+    if (!m_finder.is_active() && m_finder.to_highlight()) {
+        m_finder.find_in_content(current_buffer().rope());
+        for (const auto& matched_cursor : m_finder.matches()) {
+            if (view.viewable(matched_cursor.line, matched_cursor.column,
+                              char_size)) {
+                // draw cursorline
+                const float matched_y
+                    = constants::margin
+                    + (matched_cursor.line - view.offset_line()) * line_height;
+
+                // draw block cursor
+                const float matched_x
+                    = constants::margin
+                    + (header_width + 1 + matched_cursor.column
+                       - view.offset_column())
+                          * char_size.x;
+                DrawRectangle(matched_x, matched_y,
+                              m_finder.pattern().length() * line_width,
+                              line_height, ColorAlpha(RED, 0.2));
+            }
+        }
+    }
+
     current_buffer().suggester().render({cursor_x, cursor_y + line_height});
+    m_finder.render();
 }
 
 void Editor::render() {
@@ -505,6 +567,9 @@ void Editor::update() {
     case EditorMode::BufferList:
         buffer_list_mode(rv);
         break;
+    case EditorMode::Finder:
+        finder_mode(rv);
+        break;
     default:
         utils::unreachable();
     }
@@ -571,6 +636,16 @@ void Editor::reset_to_normal_mode() {
 }
 
 void Editor::normal_mode(Key key) {
+    if (key.key == KEY_ESCAPE) {
+        m_keybinds.reset_step();
+        m_finder.set_to_highlight(false);
+        return;
+    }
+
+    if (m_finder.is_active()) {
+        return;
+    }
+
     if (key.modifier != KEY_NULL) {
         m_keybinds.reset_step();
     } else {
@@ -743,12 +818,57 @@ void Editor::buffer_list_mode(Key key) {
             std::cerr << "Created new buffer " << m_prev_buffer_id << std::endl;
             reset_to_normal_mode();
             set_mode(EditorMode::BufferList);
+            return;
+        case 'f':
+            reset_to_normal_mode();
+            return;
         default:
             break;
         }
     }
 
     normal_mode(key);
+}
+
+void Editor::finder_mode(Key key) {
+    if (key.key == KEY_ESCAPE) {
+        m_finder.toggle_prompt(FinderMode::None);
+        reset_to_normal_mode();
+        return;
+    }
+
+    if (key.key == KEY_BACKSPACE) {
+        m_finder.delete_char();
+        return;
+    }
+
+    if (key.modifier == KEY_NULL) {
+        switch (key.key) {
+        case '\n':
+            if (m_finder.mode() == FinderMode::Find) {
+                m_finder.set_to_highlight(true);
+                m_finder.find_in_content(current_buffer().rope());
+            } else {
+                current_buffer().save_snapshot();
+                current_buffer().mark_dirty();
+                current_buffer().rope()
+                    = m_finder.replace_in_content(current_buffer().rope());
+            }
+
+            m_finder.toggle_prompt(FinderMode::None);
+            current_buffer().cursor()
+                = m_finder.next_match(current_buffer().cursor());
+            reset_to_normal_mode();
+            return;
+        case KEY_TAB:
+            if (m_finder.mode() == FinderMode::Replace) {
+                m_finder.switch_buffer();
+            }
+            return;
+        default:
+            m_finder.append_char(key.key);
+        }
+    }
 }
 
 void Editor::undo() { current_buffer().undo(); }
