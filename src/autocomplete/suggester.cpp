@@ -160,8 +160,8 @@ int Suggester::calc_score(const std::string& keyword,
     // https://en.wikipedia.org/wiki/Smith%E2%80%93Waterman_algorithm
 
     constexpr int match = 16;
-    constexpr int mismatch = -1;
-    constexpr int gap = -2;
+    constexpr int mismatch = -128;
+    constexpr int gap = -64;
 
     int max_score = 0;
 
