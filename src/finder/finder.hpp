@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "buffer.hpp"
+#include "cursor.hpp"
 #include "rope/rope.hpp"
 
 enum class FinderMode {
