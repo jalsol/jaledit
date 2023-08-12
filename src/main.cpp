@@ -8,8 +8,14 @@ int main(int argc, char** argv) {
 
     Editor editor = argc > 1 ? Editor(argv[1]) : Editor("");
 
-    InitWindow(constants::window::width, constants::window::height, "jaledit");
+    InitWindow(constants::window::width, constants::window::height,
+               "jaledit: just a little editor");
     SetExitKey(KEY_NULL);
+
+    static Image icon = LoadImage("data/icon.png");
+    ImageFormat(&icon, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+    SetWindowIcon(icon);
+    UnloadImage(icon);
 
     while (!WindowShouldClose()) {
         BeginDrawing();
