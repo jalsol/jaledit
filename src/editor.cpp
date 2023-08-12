@@ -780,20 +780,21 @@ void Editor::buffer_list_mode(Key key) {
     }
 
     if (key.modifier == KEY_NULL) {
+        m_prev_buffer_id = current_buffer().cursor().line;
+
         switch (key.key) {
         case '\n':
-            m_prev_buffer_id = current_buffer().cursor().line;
             reset_to_normal_mode();
             std::cerr << "Switched to buffer " << m_buffer_id << std::endl;
             return;
         case 'd':
-            m_prev_buffer_id = current_buffer().cursor().line;
             if (m_buffers[m_prev_buffer_id].dirty()) {
                 std::cerr << "Buffer " << m_prev_buffer_id
                           << " is modified. Cannot delete." << std::endl;
                 return;
             }
-
+            [[fallthrough]];
+        case 'D':
             m_buffers.erase(m_buffers.begin() + m_prev_buffer_id);
             std::cerr << "Deleted buffer " << m_prev_buffer_id << std::endl;
 
