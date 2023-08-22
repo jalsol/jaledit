@@ -1,0 +1,4 @@
+build/
+.vscode
+external/libnfd_d.a
+external/libnfd.a
