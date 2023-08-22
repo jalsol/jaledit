@@ -38,6 +38,11 @@ add_executable(${PROJECT_NAME}
     src/main.c
 )
 
+add_executable(vector_test
+    src/common/vector.c
+    src/common/vector_test.c
+)
+
 target_link_libraries(${PROJECT_NAME} raylib nfd)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC external)
