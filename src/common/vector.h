@@ -23,5 +23,11 @@
 
 DECLARE_VEC(char)
 DECLARE_VEC(int)
+DECLARE_VEC(size_t)
+
+struct RopeNode;
+typedef struct RopeNode RopeNode;
+typedef RopeNode *RopeNodePtr;
+DECLARE_VEC(RopeNodePtr)
 
 #undef DECLARE_VEC

@@ -43,9 +43,12 @@ add_executable(vector_test
     src/common/vector_test.c
 )
 
-add_executable(shared_ptr_test
-    src/common/shared_ptr.c
-    src/common/shared_ptr_test.c
+add_executable(rope_test
+    src/common/vector.c
+
+    src/rope/node.c
+    src/rope/rope.c
+    src/rope/test.c
 )
 
 target_link_libraries(${PROJECT_NAME} raylib nfd)

@@ -1,5 +1,7 @@
 #include "vector.h"
 
+#include "utils.h"
+
 #define DEFINE_VEC(T)                                                                    \
     struct Vec_##T {                                                                     \
         size_t capacity;                                                                 \
@@ -51,6 +53,7 @@
     }                                                                                    \
     struct Vec_##T *vec_##T##_new_subvec(struct Vec_##T *vec, size_t start,              \
                                          size_t end) {                                   \
+        end = MIN(end, vec->size);                                                       \
         struct Vec_##T *subvec = vec_##T##_new();                                        \
         vec_##T##_reserve(subvec, end - start + 1);                                      \
         for (size_t i = start; i < end; i++) {                                           \
@@ -61,3 +64,7 @@
 
 DEFINE_VEC(char)
 DEFINE_VEC(int)
+DEFINE_VEC(size_t)
+
+// RopeNodePtr defined in rope/node.h
+DEFINE_VEC(RopeNodePtr)

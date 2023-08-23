@@ -42,4 +42,15 @@ int main(void) {
 
     vec_char_delete(vec);
     vec_char_delete(subvec);
+
+    vec = vec_char_new();
+    vec_char_push_back(vec, 'a');
+    vec_char_push_back(vec, 'b');
+    vec_char_push_back(vec, 'c');
+
+    Vec_char *vec2 = vec_char_new_subvec(vec, 0, 3);
+    print_vec(vec2);
+
+    vec_char_delete(vec);
+    vec_char_delete(vec2);
 }
