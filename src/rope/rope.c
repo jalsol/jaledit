@@ -107,24 +107,30 @@ Rope *rope_prepend(Rope *rope, Rope *other) {
 Rope *rope_erase(Rope *rope, size_t start, size_t length) {
     RopeSplit split = rope_split(rope, start);
 
-    Rope *result = split.left;
     RopeSplit split2 = rope_split(split.right, length);
     rope_delete(split2.left);
 
-    result = rope_append(result, split2.right);
+    Rope *result = rope_append(split.left, split2.right);
+
+    rope_delete(split2.right);
     rope_delete(split.right);
+    rope_delete(split.left);
 
     return result;
 }
 
 Rope *rope_replace_text(Rope *rope, size_t start, size_t length, const char *text,
                         size_t text_length) {
-    return rope_replace(rope, start, length, rope_new_from_text(text, text_length));
+    Rope *other = rope_new_from_text(text, text_length);
+    Rope *result = rope_replace(rope, start, length, other);
+    rope_delete(other);
+    return result;
 }
 
 Rope *rope_replace(Rope *rope, size_t start, size_t length, Rope *other) {
-    Rope *result = rope_erase(rope, start, length);
-    result = rope_insert(result, start, other);
+    Rope *tmp = rope_erase(rope, start, length);
+    Rope *result = rope_insert(tmp, start, other);
+    rope_delete(tmp);
     return result;
 }
 

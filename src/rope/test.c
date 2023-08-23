@@ -12,7 +12,7 @@ int main() {
     printf("line cnt: %zu\n", rope_line_cnt(rope));
     printf("line start: %zu\n", rope_find_line_start(rope, 1));
 
-    Rope *rope2 = rope_insert_text(rope, 6, "cruel ", 6);
+    Rope *rope2 = rope_replace_text(rope, 0, 5, "Hi", 2);
     size_t len = rope_length(rope2);
     printf("len: %zu\n", len);
 
