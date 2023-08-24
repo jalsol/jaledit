@@ -51,6 +51,12 @@ add_executable(rope_test
     src/rope/test.c
 )
 
+add_executable(keybind_test
+    src/keybind/node.c
+    src/keybind/trie.c
+    src/keybind/test.c
+)
+
 target_link_libraries(${PROJECT_NAME} raylib nfd)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC external)
