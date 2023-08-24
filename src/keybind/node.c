@@ -40,7 +40,9 @@ void trie_branch_delete(TrieNode *node) {
     free(node);
 }
 
-TrieNode **trie_branch_child(TrieNode *node, char c) { return &node->branch.children[c]; }
+TrieNode **trie_branch_child(TrieNode *node, char c) {
+    return &node->branch.children[(size_t)c];
+}
 
 // end Branch
 
