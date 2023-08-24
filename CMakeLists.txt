@@ -42,6 +42,7 @@ add_executable(vector_test
     src/common/vector.c
     src/common/vector_test.c
 )
+target_compile_options(vector_test PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
 
 add_executable(rope_test
     src/common/vector.c
@@ -50,12 +51,14 @@ add_executable(rope_test
     src/rope/rope.c
     src/rope/test.c
 )
+target_compile_options(rope_test PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
 
 add_executable(keybind_test
     src/keybind/node.c
     src/keybind/trie.c
     src/keybind/test.c
 )
+target_compile_options(keybind_test PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
 
 add_executable(highlight_test
     src/common/utils.c
@@ -64,6 +67,7 @@ add_executable(highlight_test
     src/highlight/token.c
     src/highlight/test.c
 )
+target_compile_options(highlight_test PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
 
 add_executable(autocomplete_test
     src/common/vector.c
@@ -75,9 +79,25 @@ add_executable(autocomplete_test
     src/autocomplete/suggester.c
     src/autocomplete/test.c
 )
+target_compile_options(autocomplete_test PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
+
+add_executable(finder_test
+    src/common/vector.c
+    src/common/utils.c
+
+    src/rope/rope.c
+    src/rope/node.c
+
+    src/cursor.c
+
+    src/finder/finder.c
+    src/finder/test.c
+)
+target_compile_options(finder_test PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
 
 target_link_libraries(${PROJECT_NAME} raylib nfd)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC external)
 
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
+

@@ -105,16 +105,19 @@ Rope *rope_prepend(Rope *rope, Rope *other) {
 }
 
 Rope *rope_erase(Rope *rope, size_t start, size_t length) {
-    RopeSplit split = rope_split(rope, start);
+    RopeSplit split1 = rope_split(rope, start);
+    RopeSplit split2 = rope_split(split1.right, length);
 
-    RopeSplit split2 = rope_split(split.right, length);
+    Rope *left = split1.left;
+    Rope *right = split2.right;
+
+    rope_delete(split1.right);
     rope_delete(split2.left);
 
-    Rope *result = rope_append(split.left, split2.right);
+    Rope *result = rope_append(left, right);
 
-    rope_delete(split2.right);
-    rope_delete(split.right);
-    rope_delete(split.left);
+    rope_delete(left);
+    rope_delete(right);
 
     return result;
 }

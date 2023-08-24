@@ -3,6 +3,7 @@
 #include "common/utils.h"
 #include "common/vector.h"
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -236,6 +237,7 @@ char rope_node_at(RopeNode *node, size_t index) {
     case ROPE_NODE_BRANCH:
         return rope_branch_at(node, index);
     }
+    assert(false);
 }
 
 RopeNodeSplit rope_node_split(RopeNode *node, size_t index) {
@@ -245,6 +247,7 @@ RopeNodeSplit rope_node_split(RopeNode *node, size_t index) {
     case ROPE_NODE_BRANCH:
         return rope_branch_split(node, index);
     }
+    assert(false);
 }
 
 size_t rope_node_find_lf(RopeNode *node, size_t index) {
@@ -254,6 +257,7 @@ size_t rope_node_find_lf(RopeNode *node, size_t index) {
     case ROPE_NODE_BRANCH:
         return rope_branch_find_lf(node, index);
     }
+    assert(false);
 }
 
 void rope_node_delete(RopeNode *node) {
@@ -289,6 +293,8 @@ Vec_char *rope_node_substr(RopeNode *node, size_t start, size_t length) {
     case ROPE_NODE_BRANCH:
         return rope_branch_substr(node, start, length);
     }
+
+    assert(false);
 }
 
 size_t rope_node_length(RopeNode *node) {
