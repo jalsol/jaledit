@@ -65,6 +65,17 @@ add_executable(highlight_test
     src/highlight/test.c
 )
 
+add_executable(autocomplete_test
+    src/common/vector.c
+    src/common/utils.c
+
+    src/rope/rope.c
+    src/rope/node.c
+
+    src/autocomplete/suggester.c
+    src/autocomplete/test.c
+)
+
 target_link_libraries(${PROJECT_NAME} raylib nfd)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC external)

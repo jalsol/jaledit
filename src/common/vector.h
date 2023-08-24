@@ -19,15 +19,24 @@
     void vec_##T##_set(struct Vec_##T *vec, size_t index, T value);                      \
     void vec_##T##_reserve(struct Vec_##T *vec, size_t capacity);                        \
     void vec_##T##_resize(struct Vec_##T *vec, size_t size);                             \
-    struct Vec_##T *vec_##T##_new_subvec(struct Vec_##T *vec, size_t start, size_t end);
+    struct Vec_##T *vec_##T##_new_subvec(struct Vec_##T *vec, size_t start, size_t end); \
+    void vec_##T##_clear(struct Vec_##T *vec);                                           \
+    void vec_##T##_erase(struct Vec_##T *vec, size_t index);
 
 DECLARE_VEC(char)
 DECLARE_VEC(int)
 DECLARE_VEC(size_t)
 
-struct RopeNode;
-typedef struct RopeNode RopeNode;
-typedef RopeNode *RopeNodePtr;
-DECLARE_VEC(RopeNodePtr)
+// struct RopeNode;
+// typedef struct RopeNode RopeNode;
+// typedef RopeNode *RopeNodePtr;
+// DECLARE_VEC(RopeNodePtr)
+
+struct ScoredMatch;
+typedef struct ScoredMatch *ScoredMatchPtr;
+DECLARE_VEC(ScoredMatchPtr)
+
+typedef Vec_char *Vec_charPtr;
+DECLARE_VEC(Vec_charPtr)
 
 #undef DECLARE_VEC

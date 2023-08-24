@@ -60,11 +60,19 @@
             vec_##T##_push_back(subvec, vec->data[i]);                                   \
         }                                                                                \
         return subvec;                                                                   \
+    }                                                                                    \
+    void vec_##T##_clear(struct Vec_##T *vec) { vec->size = 0; }                         \
+    void vec_##T##_erase(struct Vec_##T *vec, size_t index) {                            \
+        for (size_t i = index; i < vec->size - 1; i++) {                                 \
+            vec->data[i] = vec->data[i + 1];                                             \
+        }                                                                                \
+        vec->size--;                                                                     \
     }
 
 DEFINE_VEC(char)
 DEFINE_VEC(int)
 DEFINE_VEC(size_t)
 
-// RopeNodePtr defined in rope/node.h
-DEFINE_VEC(RopeNodePtr)
+// DEFINE_VEC(RopeNodePtr) // RopeNodePtr defined in rope/node.h
+DEFINE_VEC(ScoredMatchPtr)
+DEFINE_VEC(Vec_charPtr)
