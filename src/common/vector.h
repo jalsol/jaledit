@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cursor.h"
+
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -38,5 +40,6 @@ DECLARE_VEC(ScoredMatchPtr)
 
 typedef Vec_char *Vec_charPtr;
 DECLARE_VEC(Vec_charPtr)
+DECLARE_VEC(Cursor)
 
 #undef DECLARE_VEC
