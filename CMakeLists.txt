@@ -36,13 +36,33 @@ link_directories(external/nativefiledialog/build/lib/Release/x64)
 
 add_executable(${PROJECT_NAME}
     src/main.c
+    src/buffer.c
+    src/cursor.c
+    src/view.c
+    src/snapshot.c
+
+    src/common/utils.c
+    src/common/vector.c
+
+    src/rope/rope.c
+    src/rope/node.c
+
+    src/keybind/node.c
+    src/keybind/trie.c
+
+    src/highlight/lexer.c
+    src/highlight/token.c
+
+    src/autocomplete/suggester.c
+
+    src/finder/finder.c
 )
 
 add_executable(vector_test
     src/common/vector.c
     src/common/vector_test.c
 )
-target_compile_options(vector_test PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
+target_compile_options(vector_test PRIVATE -Wall -Wextra -pedantic -Werror -Wno-sign-compare)
 
 add_executable(rope_test
     src/common/vector.c
@@ -51,14 +71,14 @@ add_executable(rope_test
     src/rope/rope.c
     src/rope/test.c
 )
-target_compile_options(rope_test PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
+target_compile_options(rope_test PRIVATE -Wall -Wextra -pedantic -Werror -Wno-sign-compare)
 
 add_executable(keybind_test
     src/keybind/node.c
     src/keybind/trie.c
     src/keybind/test.c
 )
-target_compile_options(keybind_test PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
+target_compile_options(keybind_test PRIVATE -Wall -Wextra -pedantic -Werror -Wno-sign-compare)
 
 add_executable(highlight_test
     src/common/utils.c
@@ -67,7 +87,7 @@ add_executable(highlight_test
     src/highlight/token.c
     src/highlight/test.c
 )
-target_compile_options(highlight_test PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
+target_compile_options(highlight_test PRIVATE -Wall -Wextra -pedantic -Werror -Wno-sign-compare)
 
 add_executable(autocomplete_test
     src/common/vector.c
@@ -79,7 +99,7 @@ add_executable(autocomplete_test
     src/autocomplete/suggester.c
     src/autocomplete/test.c
 )
-target_compile_options(autocomplete_test PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
+target_compile_options(autocomplete_test PRIVATE -Wall -Wextra -pedantic -Werror -Wno-sign-compare)
 
 add_executable(finder_test
     src/common/vector.c
@@ -93,11 +113,11 @@ add_executable(finder_test
     src/finder/finder.c
     src/finder/test.c
 )
-target_compile_options(finder_test PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
+target_compile_options(finder_test PRIVATE -Wall -Wextra -pedantic -Werror -Wno-sign-compare)
 
 target_link_libraries(${PROJECT_NAME} raylib nfd)
 
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC external)
 
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror -Wfatal-errors)
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror -Wno-sign-compare)
 

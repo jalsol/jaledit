@@ -10,7 +10,7 @@
 struct Suggester;
 typedef struct Suggester Suggester;
 
-Suggester *Suggester_new();
+Suggester *suggester_new();
 void suggester_delete(Suggester *suggester);
 
 void suggester_load_text(Suggester *suggester, Rope *text);

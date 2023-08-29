@@ -26,7 +26,7 @@ struct Suggester {
     Vec_Vec_charPtr *keywords;
 };
 
-Suggester *Suggester_new() {
+Suggester *suggester_new() {
     Suggester *suggester = malloc(sizeof(Suggester));
     suggester->text = NULL;
     suggester->pattern = NULL;

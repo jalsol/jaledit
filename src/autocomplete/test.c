@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 int main() {
-    Suggester *suggester = Suggester_new();
+    Suggester *suggester = suggester_new();
     Rope *text = rope_new_from_text("hello world\n", 12);
     suggester_load_text(suggester, text);
     suggester_set_pattern(suggester, "h", 1);
