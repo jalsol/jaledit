@@ -28,7 +28,7 @@ Vec_Cursor *finder_matches(Finder *finder);
 // Vec_size_t *finder_match_idx(Finder *finder);
 
 bool finder_is_active(Finder *finder);
-// void finder_render(Finder *finder);
+void finder_render(Finder *finder);
 
 void finder_toggle_prompt(Finder *finder, FinderMode mode);
 FinderMode finder_mode(Finder *finder);

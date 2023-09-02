@@ -12,7 +12,7 @@ struct TrieNode {
     union {
         struct {
             bool editable;
-            void (*func)(void);
+            void (*func)(Editor *editor);
         } leaf;
         struct {
             TrieNode *children[KEYBIND_MAX_CHILDREN];
@@ -48,7 +48,7 @@ TrieNode **trie_branch_child(TrieNode *node, char c) {
 
 // start Leaf
 
-TrieNode *trie_leaf_new(bool editable, void (*func)(void)) {
+TrieNode *trie_leaf_new(bool editable, void (*func)(Editor *editor)) {
     TrieNode *node = malloc(sizeof(TrieNode));
     node->kind = TRIE_NODE_LEAF;
     node->parent = NULL;
@@ -59,12 +59,12 @@ TrieNode *trie_leaf_new(bool editable, void (*func)(void)) {
 
 void trie_leaf_delete(TrieNode *node) { free(node); }
 
-void trie_leaf_call(TrieNode *node, bool editable) {
+void trie_leaf_call(TrieNode *node, Editor *editor, bool editable) {
     if (node->leaf.editable && !editable) {
         return;
     }
 
-    node->leaf.func();
+    node->leaf.func(editor);
 }
 
 // end Leaf

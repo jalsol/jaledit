@@ -4,6 +4,7 @@
 #include "common/vector.h"
 #include "rope/rope.h"
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -54,7 +55,12 @@ void suggester_delete(Suggester *suggester) {
 
 void suggester_load_text(Suggester *suggester, Rope *text) {
     suggester->text = text;
+
     vec_Vec_charPtr_clear(suggester->keywords);
+
+    if (text == NULL) {
+        return;
+    }
 
     for (size_t line = 0; line < rope_line_cnt(text); line++) {
         size_t line_start = rope_find_line_start(text, line);
@@ -172,7 +178,16 @@ void suggester_set_pattern(Suggester *suggester, const char *pattern,
     }
 }
 
-void suggester_set_to_render(Suggester *suggester) { suggester->rendering = true; }
+void suggester_render(Suggester *suggester, Vector2 origin) {
+    (void)suggester;
+    (void)origin;
+    assert(false);
+}
+
+void suggester_set_to_render(Suggester *suggester, bool should_render) {
+    suggester->rendering = should_render;
+    suggester->selected = 0;
+}
 
 bool suggester_is_rendering(Suggester *suggester) { return suggester->rendering; }
 

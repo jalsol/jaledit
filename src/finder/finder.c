@@ -4,6 +4,7 @@
 #include "common/vector.h"
 #include "rope/rope.h"
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -170,6 +171,11 @@ Cursor finder_prev_match(Finder *finder, Cursor cursor) {
 Vec_Cursor *finder_matches(Finder *finder) { return finder->matches; }
 
 bool finder_is_active(Finder *finder) { return finder->mode != FINDER_NONE; }
+
+void finder_render(Finder *finder) {
+    (void)finder;
+    assert(false);
+}
 
 FinderMode finder_mode(Finder *finder) { return finder->mode; }
 

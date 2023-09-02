@@ -122,8 +122,8 @@ static const char *keywords[] = {
 #define KEYWORD_COUNT (sizeof(keywords) / sizeof(char *))
 
 static const char *types[] = {
-    "bool",   "char",     "float", "double",   "int",      "long",    "short",
-    "signed", "unsigned", "void",  "char16_t", "char32_t", "char8_t", "wchar_t",
+    "bool",     "char", "float",    "double",   "int",     "long",    "short",  "signed",
+    "unsigned", "void", "char16_t", "char32_t", "char8_t", "wchar_t", "size_t",
 };
 
 #define TYPE_COUNT (sizeof(types) / sizeof(char *))

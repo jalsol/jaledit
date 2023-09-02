@@ -5,6 +5,9 @@
 struct TrieNode;
 typedef struct TrieNode TrieNode;
 
+struct Editor;
+typedef struct Editor Editor;
+
 typedef enum TrieNodeKind {
     TRIE_NODE_LEAF,
     TRIE_NODE_BRANCH,
@@ -24,7 +27,7 @@ TrieNode **trie_branch_child(TrieNode *node, char c);
 
 // start Leaf
 
-TrieNode *trie_leaf_new(bool editable, void (*func)(void));
-void trie_leaf_call(TrieNode *node, bool editable);
+TrieNode *trie_leaf_new(bool editable, void (*func)(Editor *editor));
+void trie_leaf_call(TrieNode *node, Editor *editor, bool editable);
 
 // end Leaf

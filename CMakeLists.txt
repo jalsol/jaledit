@@ -40,6 +40,7 @@ add_executable(${PROJECT_NAME}
     src/cursor.c
     src/view.c
     src/snapshot.c
+    src/editor.c
 
     src/common/utils.c
     src/common/vector.c

@@ -18,6 +18,7 @@ void buffer_delete(Buffer *buffer);
 Cursor buffer_cursor(Buffer *buffer);
 void buffer_set_cursor(Buffer *buffer, Cursor cursor);
 Rope *buffer_rope(Buffer *buffer);
+void buffer_set_rope(Buffer *buffer, Rope *rope);
 View buffer_view(Buffer *buffer);
 void buffer_set_view(Buffer *buffer, View view);
 Cursor buffer_select_orig(Buffer *buffer);
@@ -45,6 +46,7 @@ void buffer_copy_selection(Buffer *buffer);
 void buffer_copy_range(Buffer *buffer, size_t start, size_t end);
 
 void buffer_undo(Buffer *buffer);
+Rope *buffer_undo_top(Buffer *buffer);
 void buffer_redo(Buffer *buffer);
 void buffer_save_snapshot(Buffer *buffer);
 void buffer_save_file(Buffer *buffer);

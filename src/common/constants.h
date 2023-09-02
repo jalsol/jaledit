@@ -17,4 +17,5 @@ enum {
     CHAR_LIMIT = 1 << 8,
     MAX_BUFFER_LINES = 1 << 20,
     LINE_SPACING = 2,
+    MAX_LINE_LENGTH = 1 << 20,
 };

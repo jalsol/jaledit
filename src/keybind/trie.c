@@ -22,7 +22,7 @@ void keybind_delete(Keybind *keybind) {
 }
 
 void keybind_add(Keybind *keybind, const char *key, size_t len, bool editable,
-                 void (*func)(void)) {
+                 void (*func)(Editor *editor)) {
     TrieNode *current = keybind->root;
 
     for (size_t i = 0; i < len - 1; ++i) {
@@ -39,7 +39,7 @@ void keybind_add(Keybind *keybind, const char *key, size_t len, bool editable,
     *trie_branch_child(current, key[len - 1]) = trie_leaf_new(editable, func);
 }
 
-void keybind_step(Keybind *keybind, char c, bool editable) {
+void keybind_step(Keybind *keybind, Editor *editor, char c, bool editable) {
     if (keybind->current == NULL) {
         keybind_reset(keybind);
         return;
@@ -54,7 +54,7 @@ void keybind_step(Keybind *keybind, char c, bool editable) {
     keybind->current = *child_ref;
 
     if (trie_node_kind(keybind->current) == TRIE_NODE_LEAF) {
-        trie_leaf_call(keybind->current, editable);
+        trie_leaf_call(keybind->current, editor, editable);
         keybind_reset(keybind);
     }
 }

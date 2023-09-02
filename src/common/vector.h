@@ -24,7 +24,8 @@
     void vec_##T##_resize(struct Vec_##T *vec, size_t size);                             \
     struct Vec_##T *vec_##T##_new_subvec(struct Vec_##T *vec, size_t start, size_t end); \
     void vec_##T##_clear(struct Vec_##T *vec);                                           \
-    void vec_##T##_erase(struct Vec_##T *vec, size_t index);
+    void vec_##T##_erase(struct Vec_##T *vec, size_t index);                             \
+    void vec_##T##_insert(struct Vec_##T *vec, size_t index, T value);
 
 #define DEFINE_VEC(T)                                                                    \
     struct Vec_##T {                                                                     \
@@ -91,6 +92,13 @@
             vec->data[i] = vec->data[i + 1];                                             \
         }                                                                                \
         vec->size--;                                                                     \
+    }                                                                                    \
+    void vec_##T##_insert(struct Vec_##T *vec, size_t index, T value) {                  \
+        vec_##T##_push_back(vec, value);                                                 \
+        for (size_t i = vec->size - 1; i > index; i--) {                                 \
+            vec->data[i] = vec->data[i - 1];                                             \
+        }                                                                                \
+        vec->data[index] = value;                                                        \
     }
 
 DECLARE_VEC(char)
@@ -109,3 +117,7 @@ DECLARE_VEC(ScoredMatchPtr)
 typedef Vec_char *Vec_charPtr;
 DECLARE_VEC(Vec_charPtr)
 DECLARE_VEC(Cursor)
+
+struct Buffer;
+typedef struct Buffer *BufferPtr;
+DECLARE_VEC(BufferPtr)

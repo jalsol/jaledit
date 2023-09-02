@@ -222,11 +222,12 @@ RopeNodeSplit rope_branch_split(RopeNode *node, size_t index) {
 // }
 
 size_t rope_branch_find_lf(RopeNode *node, size_t index) {
-    if (index < node->lf_count) {
+    if (index < rope_node_lf_cnt(node->branch.left)) {
         return rope_node_find_lf(node->branch.left, index);
     } else {
         return node->weight +
-               rope_node_find_lf(node->branch.right, index - node->lf_count);
+               rope_node_find_lf(node->branch.right,
+                                 index - rope_node_lf_cnt(node->branch.left));
     }
 }
 

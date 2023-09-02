@@ -66,7 +66,7 @@ Buffer *buffer_new_from_file(const char *filename) {
     struct stat sb;
     assert(fstat(fd, &sb) != -1 && "Could not get file size");
 
-    if (sb.st_size == 0) {
+    if (sb.st_size == 1) {
         return buffer;
     } else {
         rope_delete(buffer->rope);
@@ -101,6 +101,12 @@ Buffer *buffer_new_from_file(const char *filename) {
 
 void buffer_delete(Buffer *buffer) {
     rope_delete(buffer->rope);
+    for (size_t i = 0; i < vec_Snapshot_size(buffer->undo); ++i) {
+        rope_delete(vec_Snapshot_at(buffer->undo, i).rope);
+    }
+    for (size_t i = 0; i < vec_Snapshot_size(buffer->redo); ++i) {
+        rope_delete(vec_Snapshot_at(buffer->redo, i).rope);
+    }
     vec_Snapshot_delete(buffer->undo);
     vec_Snapshot_delete(buffer->redo);
     suggester_delete(buffer->suggester);
@@ -112,6 +118,11 @@ Cursor buffer_cursor(Buffer *buffer) { return buffer->cursor; }
 void buffer_set_cursor(Buffer *buffer, Cursor cursor) { buffer->cursor = cursor; }
 
 Rope *buffer_rope(Buffer *buffer) { return buffer->rope; }
+
+void buffer_set_rope(Buffer *buffer, Rope *rope) {
+    rope_delete(buffer->rope);
+    buffer->rope = rope;
+}
 
 View buffer_view(Buffer *buffer) { return buffer->view; }
 
@@ -387,6 +398,15 @@ void buffer_undo(Buffer *buffer) {
     buffer_set_cursor(buffer, buffer->cursor);
 
     vec_Snapshot_pop_back(buffer->undo);
+}
+
+Rope *buffer_undo_top(Buffer *buffer) {
+    if (vec_Snapshot_size(buffer->undo) == 0) {
+        return NULL;
+    }
+
+    Snapshot snapshot = vec_Snapshot_back(buffer->undo);
+    return snapshot.rope;
 }
 
 void buffer_redo(Buffer *buffer) {
