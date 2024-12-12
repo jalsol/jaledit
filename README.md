@@ -1,8 +1,6 @@
-# CS163 Project: jaledit - just a little editor
+# jaledit - just a little editor
 
 ![jaledit screenshot](data/screenshot.png)
-
-Author: 22125113 - Nguyen Quang Truong
 
 This is a source code text editor that focuses on **performance**. With the help of **different data structures and algorithms**, this editor offers **superior performance** over popular existing editors (*Vim, Nano, Visual Studio Code, Sublime Text...*), as it enables **efficient editing operations** and manages **huge files** (that would otherwise crash or stall other editors).
 
@@ -20,7 +18,6 @@ It currently supports the following features:
 ## Demonstration
 - [using jaledit to solve programming problems](https://www.youtube.com/watch?v=DOiqO8f-9TY)
 - [jaledit loads faster than other editors](https://www.youtube.com/watch?v=o27J9EdEBYo)
-
 
 ## Repository
 [Here is the repository of the project on GitHub.](https://github.com/jalsol/jaledit)
